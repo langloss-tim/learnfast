@@ -1,0 +1,275 @@
+"""SQLAlchemy database models for the Pre-Algebra Learning System."""
+
+from datetime import datetime
+from typing import Optional
+import json
+
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Float,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    JSON,
+    Enum as SQLEnum,
+)
+from sqlalchemy.orm import DeclarativeBase, relationship
+import enum
+
+
+class Base(DeclarativeBase):
+    """Base class for all models."""
+    pass
+
+
+class MaterialType(enum.Enum):
+    """Types of learning materials."""
+    LESSON = "lesson"
+    PRACTICE = "practice"
+    QUIZ = "quiz"
+    TEST = "test"
+    REMEDIATION = "remediation"
+    DIAGNOSTIC = "diagnostic"
+
+
+class SubmissionStatus(enum.Enum):
+    """Status of a submission."""
+    PENDING = "pending"  # Awaiting grading
+    GRADED = "graded"  # Has been graded
+    NEEDS_RETRY = "needs_retry"  # Below mastery, needs retry
+
+
+class Subject(Base):
+    """Subject/course in the math curriculum."""
+    __tablename__ = "subjects"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String(20), unique=True, nullable=False)  # "4TH_GRADE", "PREALGEBRA", etc.
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    grade_level = Column(Integer)  # Approximate grade level (4-12)
+    order = Column(Integer)  # Display order in subject list
+
+    # Relationships
+    modules = relationship("Module", back_populates="subject", order_by="Module.number")
+
+    def __repr__(self):
+        return f"<Subject(code='{self.code}', name='{self.name}')>"
+
+
+class Student(Base):
+    """Student profile and current progress."""
+    __tablename__ = "students"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    current_module_id = Column(Integer, ForeignKey("modules.id"), nullable=True)
+    current_lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=True)
+
+    # Relationships
+    progress = relationship("Progress", back_populates="student")
+    submissions = relationship("Submission", back_populates="student")
+    subject_progress = relationship("StudentSubjectProgress", back_populates="student")
+
+    def __repr__(self):
+        return f"<Student(id={self.id}, name='{self.name}')>"
+
+
+class StudentSubjectProgress(Base):
+    """Track per-student, per-subject progress with adaptive pacing metrics."""
+    __tablename__ = "student_subject_progress"
+
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+
+    # Current position within subject
+    current_module_id = Column(Integer, ForeignKey("modules.id"), nullable=True)
+    current_lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=True)
+
+    # Adaptive pacing metrics
+    velocity_score = Column(Float, default=1.0)  # Learning speed (0.5-2.0)
+    consecutive_perfect = Column(Integer, default=0)  # Streak of 100% scores
+    consecutive_struggles = Column(Integer, default=0)  # Streak of <70% scores
+
+    # Subject status
+    status = Column(String(20), default="active")  # active, paused, completed
+    enrolled_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    last_accessed_at = Column(DateTime, default=datetime.utcnow)  # Track most recent activity
+
+    # Relationships
+    student = relationship("Student", back_populates="subject_progress")
+    subject = relationship("Subject")
+
+    def __repr__(self):
+        return f"<StudentSubjectProgress(student={self.student_id}, subject={self.subject_id}, velocity={self.velocity_score})>"
+
+
+class Module(Base):
+    """Curriculum module within a subject."""
+    __tablename__ = "modules"
+
+    id = Column(Integer, primary_key=True)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)  # nullable for migration
+    number = Column(Integer, nullable=False)  # Module number within subject
+    title = Column(String(100), nullable=False)
+    description = Column(Text)
+    real_world_applications = Column(JSON)  # List of application descriptions
+
+    # Relationships
+    subject = relationship("Subject", back_populates="modules")
+    lessons = relationship("Lesson", back_populates="module", order_by="Lesson.number")
+
+    def __repr__(self):
+        return f"<Module(number={self.number}, title='{self.title}')>"
+
+
+class Lesson(Base):
+    """Individual lesson within a module."""
+    __tablename__ = "lessons"
+
+    id = Column(Integer, primary_key=True)
+    module_id = Column(Integer, ForeignKey("modules.id"), nullable=False)
+    number = Column(Integer, nullable=False)  # Lesson number within module
+    title = Column(String(200), nullable=False)
+    description = Column(Text)
+    concepts = Column(JSON)  # List of concepts covered
+    prerequisites = Column(JSON)  # List of prerequisite lesson IDs
+
+    # Relationships
+    module = relationship("Module", back_populates="lessons")
+    materials = relationship("Material", back_populates="lesson")
+
+    def __repr__(self):
+        return f"<Lesson(module={self.module_id}, number={self.number}, title='{self.title}')>"
+
+
+class Material(Base):
+    """Generated learning material (PDF)."""
+    __tablename__ = "materials"
+
+    id = Column(Integer, primary_key=True)
+    lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
+    material_type = Column(SQLEnum(MaterialType), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    file_path = Column(String(500))  # Path to generated PDF
+
+    # Content stored as JSON
+    content_json = Column(JSON)  # The generated content (problems, explanations)
+    answer_key_json = Column(JSON)  # Correct answers for grading
+
+    # QR code identifier for scan matching
+    qr_code = Column(String(50), unique=True, nullable=False)
+
+    # Relationships
+    lesson = relationship("Lesson", back_populates="materials")
+    submissions = relationship("Submission", back_populates="material")
+
+    def __repr__(self):
+        return f"<Material(id={self.id}, type={self.material_type.value}, lesson={self.lesson_id})>"
+
+    @property
+    def answer_key(self) -> dict:
+        """Get the answer key as a dictionary."""
+        return self.answer_key_json or {}
+
+    @property
+    def problems(self) -> list:
+        """Get the problems list."""
+        content = self.content_json or {}
+        return content.get("problems", [])
+
+
+class Submission(Base):
+    """Scanned and graded student work."""
+    __tablename__ = "submissions"
+
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+
+    # Scan information
+    scan_path = Column(String(500))  # Path to scanned image
+    scanned_at = Column(DateTime, default=datetime.utcnow)
+
+    # Grading results
+    status = Column(SQLEnum(SubmissionStatus), default=SubmissionStatus.PENDING)
+    graded_at = Column(DateTime, nullable=True)
+    score = Column(Float, nullable=True)  # Percentage score (0-100)
+
+    # Detailed results
+    results_json = Column(JSON)  # Per-problem results
+    feedback_json = Column(JSON)  # Detailed feedback
+    error_patterns = Column(JSON)  # Identified error patterns
+
+    # Feedback PDF
+    feedback_pdf_path = Column(String(500), nullable=True)
+
+    # Relationships
+    student = relationship("Student", back_populates="submissions")
+    material = relationship("Material", back_populates="submissions")
+
+    def __repr__(self):
+        return f"<Submission(id={self.id}, material={self.material_id}, score={self.score})>"
+
+    @property
+    def is_mastery(self) -> bool:
+        """Check if this submission achieved mastery (100%)."""
+        return self.score is not None and self.score >= 100
+
+    @property
+    def results(self) -> list:
+        """Get the per-problem results."""
+        return self.results_json or []
+
+    @property
+    def feedback(self) -> dict:
+        """Get the feedback dictionary."""
+        return self.feedback_json or {}
+
+
+class Progress(Base):
+    """Student progress and mastery tracking per lesson."""
+    __tablename__ = "progress"
+
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
+
+    # Mastery status
+    mastered = Column(Boolean, default=False)
+    mastered_at = Column(DateTime, nullable=True)
+
+    # Attempt tracking
+    practice_attempts = Column(Integer, default=0)
+    quiz_attempts = Column(Integer, default=0)
+    best_practice_score = Column(Float, nullable=True)
+    best_quiz_score = Column(Float, nullable=True)
+
+    # Error pattern tracking for adaptive learning
+    error_patterns_json = Column(JSON)  # Accumulated error patterns
+
+    # Timing (for speed-up logic)
+    total_time_minutes = Column(Float, default=0)
+
+    # Relationships
+    student = relationship("Student", back_populates="progress")
+
+    def __repr__(self):
+        return f"<Progress(student={self.student_id}, lesson={self.lesson_id}, mastered={self.mastered})>"
+
+    @property
+    def error_patterns(self) -> dict:
+        """Get error patterns dictionary."""
+        return self.error_patterns_json or {}
+
+    def add_error_pattern(self, pattern: str, count: int = 1):
+        """Add or increment an error pattern."""
+        patterns = self.error_patterns_json or {}
+        patterns[pattern] = patterns.get(pattern, 0) + count
+        self.error_patterns_json = patterns

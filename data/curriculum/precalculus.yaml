@@ -1,0 +1,310 @@
+subject:
+  code: PRECALCULUS
+  name: Pre-Calculus
+  description: Bridge to calculus covering advanced functions, trigonometry, and limits introduction.
+  grade_level: 11
+  order: 6
+
+modules:
+  - number: 1
+    title: Functions and Their Graphs
+    description: Deep understanding of functions and their behaviors.
+    real_world_applications:
+      - Economic modeling
+      - Physics simulations
+      - Computer graphics
+      - Data analysis
+    lessons:
+      - number: 1
+        title: Functions and Function Notation
+        concepts:
+          - domain and range
+          - function evaluation
+          - piecewise functions
+      - number: 2
+        title: Transformations of Functions
+        concepts:
+          - translations
+          - reflections
+          - stretches and compressions
+      - number: 3
+        title: Combining Functions
+        concepts:
+          - arithmetic operations
+          - composition of functions
+          - decomposition
+      - number: 4
+        title: Inverse Functions
+        concepts:
+          - finding inverses
+          - verifying inverses
+          - graphing inverses
+      - number: 5
+        title: Analyzing Functions
+        concepts:
+          - increasing/decreasing
+          - maximums and minimums
+          - symmetry
+
+  - number: 2
+    title: Polynomial and Rational Functions
+    description: Master polynomial and rational function behaviors.
+    real_world_applications:
+      - Engineering design
+      - Economics
+      - Physics
+      - Medical dosing
+    lessons:
+      - number: 1
+        title: Polynomial Functions and Models
+        concepts:
+          - degree and leading coefficient
+          - end behavior
+          - zeros and multiplicity
+      - number: 2
+        title: Polynomial Division
+        concepts:
+          - long division
+          - synthetic division
+          - remainder theorem
+      - number: 3
+        title: Zeros of Polynomial Functions
+        concepts:
+          - rational zeros theorem
+          - complex zeros
+          - factor theorem
+      - number: 4
+        title: Rational Functions
+        concepts:
+          - domain restrictions
+          - asymptotes
+          - graphing
+      - number: 5
+        title: Partial Fractions
+        concepts:
+          - decomposition
+          - distinct linear factors
+          - repeated factors
+
+  - number: 3
+    title: Exponential and Logarithmic Functions
+    description: Advanced study of exponential and logarithmic relationships.
+    real_world_applications:
+      - Population growth
+      - Radioactive decay
+      - Financial modeling
+      - Acoustics
+    lessons:
+      - number: 1
+        title: Exponential Functions
+        concepts:
+          - properties
+          - natural base e
+          - compound interest
+      - number: 2
+        title: Logarithmic Functions
+        concepts:
+          - inverse relationship
+          - properties of logarithms
+          - change of base
+      - number: 3
+        title: Exponential and Logarithmic Equations
+        concepts:
+          - solving equations
+          - applications
+          - growth and decay models
+      - number: 4
+        title: Logistic Growth Models
+        concepts:
+          - carrying capacity
+          - logistic function
+          - applications
+
+  - number: 4
+    title: Trigonometric Functions
+    description: Unit circle approach to trigonometric functions.
+    real_world_applications:
+      - Sound waves
+      - Circular motion
+      - Navigation
+      - Electrical engineering
+    lessons:
+      - number: 1
+        title: Angles and Radian Measure
+        concepts:
+          - degree-radian conversion
+          - arc length
+          - angular velocity
+      - number: 2
+        title: The Unit Circle
+        concepts:
+          - coordinate definitions
+          - reference angles
+          - exact values
+      - number: 3
+        title: Trigonometric Functions
+        concepts:
+          - sine, cosine, tangent
+          - secant, cosecant, cotangent
+          - domain and range
+      - number: 4
+        title: Graphs of Sine and Cosine
+        concepts:
+          - amplitude
+          - period
+          - phase shift
+          - vertical shift
+      - number: 5
+        title: Graphs of Other Trig Functions
+        concepts:
+          - tangent and cotangent
+          - secant and cosecant
+          - asymptotes
+      - number: 6
+        title: Inverse Trigonometric Functions
+        concepts:
+          - restricted domains
+          - evaluating inverse trig
+          - compositions
+
+  - number: 5
+    title: Trigonometric Identities and Equations
+    description: Master trig identities and solve trig equations.
+    real_world_applications:
+      - Physics
+      - Signal processing
+      - Optics
+      - Engineering
+    lessons:
+      - number: 1
+        title: Fundamental Trigonometric Identities
+        concepts:
+          - reciprocal identities
+          - quotient identities
+          - Pythagorean identities
+      - number: 2
+        title: Verifying Trigonometric Identities
+        concepts:
+          - algebraic techniques
+          - strategies
+          - complex expressions
+      - number: 3
+        title: Sum and Difference Formulas
+        concepts:
+          - sine sum/difference
+          - cosine sum/difference
+          - tangent sum/difference
+      - number: 4
+        title: Double-Angle and Half-Angle Formulas
+        concepts:
+          - double-angle formulas
+          - half-angle formulas
+          - applications
+      - number: 5
+        title: Solving Trigonometric Equations
+        concepts:
+          - linear equations
+          - quadratic forms
+          - multiple angle equations
+
+  - number: 6
+    title: Applications of Trigonometry
+    description: Apply trigonometry to real-world problems.
+    real_world_applications:
+      - Surveying
+      - Navigation
+      - Physics
+      - Engineering
+    lessons:
+      - number: 1
+        title: Law of Sines
+        concepts:
+          - formula
+          - ambiguous case
+          - applications
+      - number: 2
+        title: Law of Cosines
+        concepts:
+          - formula
+          - choosing the right law
+          - applications
+      - number: 3
+        title: Area of Triangles
+        concepts:
+          - Hero's formula
+          - sine area formula
+          - applications
+      - number: 4
+        title: Vectors
+        concepts:
+          - component form
+          - magnitude and direction
+          - operations
+
+  - number: 7
+    title: Analytic Geometry
+    description: Study conic sections and parametric equations.
+    real_world_applications:
+      - Satellite orbits
+      - Architecture
+      - Reflectors
+      - Projectile motion
+    lessons:
+      - number: 1
+        title: Parabolas
+        concepts:
+          - vertex and focus
+          - directrix
+          - graphing
+      - number: 2
+        title: Ellipses
+        concepts:
+          - foci
+          - major and minor axes
+          - eccentricity
+      - number: 3
+        title: Hyperbolas
+        concepts:
+          - foci
+          - asymptotes
+          - graphing
+      - number: 4
+        title: Parametric Equations
+        concepts:
+          - converting forms
+          - graphing
+          - applications
+
+  - number: 8
+    title: Introduction to Limits
+    description: Preview of calculus concepts.
+    real_world_applications:
+      - Instantaneous rates
+      - Continuous processes
+      - Physics
+      - Economics
+    lessons:
+      - number: 1
+        title: Intuitive Understanding of Limits
+        concepts:
+          - limit concept
+          - graphical approach
+          - tables of values
+      - number: 2
+        title: Evaluating Limits Algebraically
+        concepts:
+          - direct substitution
+          - factoring
+          - rationalizing
+      - number: 3
+        title: One-Sided Limits and Continuity
+        concepts:
+          - left and right limits
+          - continuity definition
+          - types of discontinuity
+      - number: 4
+        title: Limits at Infinity
+        concepts:
+          - end behavior
+          - horizontal asymptotes
+          - infinite limits

@@ -1,0 +1,317 @@
+"""Database connection and initialization."""
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from contextlib import contextmanager
+
+from ..config import get_database_url, DATABASE_PATH
+from .models import Base, Module, Lesson, Subject, StudentSubjectProgress, Student
+
+
+# Create engine and session factory
+engine = create_engine(get_database_url(), echo=False)
+SessionLocal = sessionmaker(bind=engine)
+
+
+def init_db():
+    """Initialize the database, creating all tables."""
+    # Ensure parent directory exists
+    DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    # Create all tables
+    Base.metadata.create_all(engine)
+
+    # Seed initial curriculum data if no subjects exist
+    with get_session() as session:
+        if session.query(Subject).count() == 0:
+            # Try to load from YAML files first
+            loaded = load_curricula_from_yaml(session)
+            if not loaded:
+                # Fall back to hardcoded pre-algebra curriculum
+                seed_curriculum(session)
+        elif session.query(Module).filter(Module.subject_id.is_(None)).count() > 0:
+            # Migrate existing modules without subject_id
+            migrate_modules_to_subjects(session)
+
+
+@contextmanager
+def get_session() -> Session:
+    """Get a database session with automatic cleanup."""
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+def load_curricula_from_yaml(session: Session) -> bool:
+    """Load all curriculum YAML files and seed the database."""
+    from ..content.curriculum_loader import CURRICULUM_DIR, load_curriculum_from_yaml, seed_subject
+
+    if not CURRICULUM_DIR.exists():
+        return False
+
+    yaml_files = list(CURRICULUM_DIR.glob("*.yaml")) + list(CURRICULUM_DIR.glob("*.yml"))
+
+    if not yaml_files:
+        return False
+
+    loaded_count = 0
+    for yaml_path in yaml_files:
+        data = load_curriculum_from_yaml(yaml_path)
+        if data:
+            subject = seed_subject(data, session)
+            if subject:
+                loaded_count += 1
+                print(f"Loaded curriculum: {subject.name} ({yaml_path.name})")
+
+    if loaded_count > 0:
+        # Auto-enroll existing students in Pre-Algebra for backward compatibility
+        enroll_existing_students(session)
+        return True
+
+    return False
+
+
+def migrate_modules_to_subjects(session: Session):
+    """Migrate existing modules to the Pre-Algebra subject."""
+    # Create Pre-Algebra subject if it doesn't exist
+    prealgebra = session.query(Subject).filter(Subject.code == "PREALGEBRA").first()
+
+    if not prealgebra:
+        prealgebra = Subject(
+            code="PREALGEBRA",
+            name="Pre-Algebra",
+            description="Foundation for algebraic thinking",
+            grade_level=6,
+            order=2,
+        )
+        session.add(prealgebra)
+        session.flush()
+
+    # Update all modules without a subject to Pre-Algebra
+    modules = session.query(Module).filter(Module.subject_id.is_(None)).all()
+    for module in modules:
+        module.subject_id = prealgebra.id
+
+    # Enroll existing students in Pre-Algebra
+    enroll_existing_students(session)
+
+    print(f"Migrated {len(modules)} modules to Pre-Algebra subject.")
+
+
+def enroll_existing_students(session: Session):
+    """Enroll existing students in Pre-Algebra for backward compatibility."""
+    prealgebra = session.query(Subject).filter(Subject.code == "PREALGEBRA").first()
+    if not prealgebra:
+        return
+
+    students = session.query(Student).all()
+    for student in students:
+        # Check if already enrolled
+        existing = (
+            session.query(StudentSubjectProgress)
+            .filter(
+                StudentSubjectProgress.student_id == student.id,
+                StudentSubjectProgress.subject_id == prealgebra.id
+            )
+            .first()
+        )
+
+        if not existing:
+            # Get first module/lesson
+            first_module = (
+                session.query(Module)
+                .filter(Module.subject_id == prealgebra.id)
+                .order_by(Module.number)
+                .first()
+            )
+            first_lesson = first_module.lessons[0] if first_module and first_module.lessons else None
+
+            progress = StudentSubjectProgress(
+                student_id=student.id,
+                subject_id=prealgebra.id,
+                current_module_id=first_module.id if first_module else None,
+                current_lesson_id=first_lesson.id if first_lesson else None,
+                status="active",
+            )
+            session.add(progress)
+            print(f"Enrolled {student.name} in Pre-Algebra")
+
+
+def seed_curriculum(session: Session):
+    """Seed the database with the 8 pre-algebra modules and their lessons."""
+
+    # Create Pre-Algebra subject first
+    prealgebra = Subject(
+        code="PREALGEBRA",
+        name="Pre-Algebra",
+        description="Foundation for algebraic thinking - master integers, fractions, ratios, expressions, equations, and basic geometry.",
+        grade_level=6,
+        order=2,
+    )
+    session.add(prealgebra)
+    session.flush()
+
+    modules_data = [
+        {
+            "number": 1,
+            "title": "Integers and Operations",
+            "description": "Master adding, subtracting, multiplying, and dividing integers, plus order of operations.",
+            "real_world_applications": [
+                "Temperature changes (above/below zero)",
+                "Finance: understanding debt and credit",
+                "Elevator floors (going up and down)",
+                "Sea level and altitude"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Understanding Positive and Negative Numbers", "concepts": ["number line", "opposites", "absolute value"]},
+                {"number": 2, "title": "Adding Integers", "concepts": ["same signs", "different signs", "additive inverse"]},
+                {"number": 3, "title": "Subtracting Integers", "concepts": ["subtraction as adding opposite", "number line subtraction"]},
+                {"number": 4, "title": "Multiplying and Dividing Integers", "concepts": ["sign rules", "multiplication patterns", "division"]},
+                {"number": 5, "title": "Order of Operations (PEMDAS)", "concepts": ["parentheses", "exponents", "left to right"]}
+            ]
+        },
+        {
+            "number": 2,
+            "title": "Fractions and Decimals",
+            "description": "Master operations with fractions and decimals, and convert between them.",
+            "real_world_applications": [
+                "Cooking and recipes (half a cup, 1/4 teaspoon)",
+                "Money calculations ($3.50, quarters)",
+                "Measurements (3/4 inch, 2.5 meters)",
+                "Splitting things fairly"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Fraction Fundamentals", "concepts": ["numerator", "denominator", "equivalent fractions", "simplifying"]},
+                {"number": 2, "title": "Adding and Subtracting Fractions", "concepts": ["common denominators", "LCD", "mixed numbers"]},
+                {"number": 3, "title": "Multiplying and Dividing Fractions", "concepts": ["multiply across", "reciprocal", "dividing fractions"]},
+                {"number": 4, "title": "Decimal Operations", "concepts": ["place value", "adding decimals", "multiplying decimals"]},
+                {"number": 5, "title": "Converting Between Fractions and Decimals", "concepts": ["fraction to decimal", "decimal to fraction", "repeating decimals"]}
+            ]
+        },
+        {
+            "number": 3,
+            "title": "Ratios, Proportions, and Percents",
+            "description": "Understand relationships between quantities and solve proportion problems.",
+            "real_world_applications": [
+                "Scaling recipes (double a recipe)",
+                "Sales and discounts (20% off)",
+                "Sports statistics (batting average)",
+                "Maps and scale models"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Understanding Ratios", "concepts": ["ratio notation", "equivalent ratios", "simplifying ratios"]},
+                {"number": 2, "title": "Rates and Unit Rates", "concepts": ["rate", "unit rate", "comparing rates"]},
+                {"number": 3, "title": "Solving Proportions", "concepts": ["cross multiplication", "setting up proportions"]},
+                {"number": 4, "title": "Understanding Percents", "concepts": ["percent meaning", "converting percents", "percent of a number"]},
+                {"number": 5, "title": "Percent Applications", "concepts": ["percent increase", "percent decrease", "tax and tip", "discounts"]}
+            ]
+        },
+        {
+            "number": 4,
+            "title": "Expressions and Equations",
+            "description": "Learn to work with variables and solve basic equations.",
+            "real_world_applications": [
+                "Distance, rate, and time calculations",
+                "Simple programming formulas",
+                "Calculating costs with unknowns",
+                "Science formulas"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Variables and Expressions", "concepts": ["variable", "coefficient", "constant", "terms"]},
+                {"number": 2, "title": "Evaluating Expressions", "concepts": ["substitution", "order of operations with variables"]},
+                {"number": 3, "title": "Simplifying Expressions", "concepts": ["combining like terms", "distributive property"]},
+                {"number": 4, "title": "Solving One-Step Equations", "concepts": ["inverse operations", "balance principle"]},
+                {"number": 5, "title": "Solving Two-Step Equations", "concepts": ["multiple steps", "checking solutions"]}
+            ]
+        },
+        {
+            "number": 5,
+            "title": "Inequalities and Functions",
+            "description": "Compare quantities and understand input-output relationships.",
+            "real_world_applications": [
+                "Budget constraints (spend less than $50)",
+                "Age requirements (must be at least 13)",
+                "Input-output in apps and games",
+                "Speed limits and rules"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Writing and Graphing Inequalities", "concepts": ["inequality symbols", "number line graphing"]},
+                {"number": 2, "title": "Solving One-Step Inequalities", "concepts": ["solving inequalities", "flipping the sign"]},
+                {"number": 3, "title": "Understanding Functions", "concepts": ["input", "output", "function rule", "function notation"]},
+                {"number": 4, "title": "Function Tables and Graphs", "concepts": ["input-output tables", "plotting points", "linear patterns"]}
+            ]
+        },
+        {
+            "number": 6,
+            "title": "Geometry Basics",
+            "description": "Calculate area, perimeter, and volume of common shapes.",
+            "real_world_applications": [
+                "Room design and flooring",
+                "Art and design projects",
+                "Packaging and containers",
+                "Sports fields and courts"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Perimeter of Polygons", "concepts": ["perimeter", "adding sides", "regular polygons"]},
+                {"number": 2, "title": "Area of Rectangles and Triangles", "concepts": ["area formula", "square units", "triangle area"]},
+                {"number": 3, "title": "Area of Parallelograms and Trapezoids", "concepts": ["base", "height", "parallelogram area", "trapezoid area"]},
+                {"number": 4, "title": "Circles: Circumference and Area", "concepts": ["pi", "radius", "diameter", "circumference", "circle area"]},
+                {"number": 5, "title": "Volume of Prisms and Cylinders", "concepts": ["3D shapes", "volume formula", "cubic units"]}
+            ]
+        },
+        {
+            "number": 7,
+            "title": "Data and Statistics",
+            "description": "Analyze data and understand basic probability.",
+            "real_world_applications": [
+                "Survey results and polls",
+                "Weather predictions",
+                "Game probabilities",
+                "Sports statistics"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Mean, Median, and Mode", "concepts": ["average", "middle value", "most frequent", "when to use each"]},
+                {"number": 2, "title": "Range and Data Displays", "concepts": ["range", "bar graphs", "line plots", "histograms"]},
+                {"number": 3, "title": "Introduction to Probability", "concepts": ["probability", "outcomes", "events", "likelihood"]},
+                {"number": 4, "title": "Experimental vs Theoretical Probability", "concepts": ["experiments", "predictions", "comparing probabilities"]}
+            ]
+        },
+        {
+            "number": 8,
+            "title": "Introduction to Algebra",
+            "description": "Bridge to algebra with patterns, sequences, and linear relationships.",
+            "real_world_applications": [
+                "Population growth predictions",
+                "Savings account growth",
+                "Pattern recognition in nature",
+                "Trend analysis"
+            ],
+            "lessons": [
+                {"number": 1, "title": "Number Patterns and Sequences", "concepts": ["arithmetic sequences", "geometric sequences", "finding the rule"]},
+                {"number": 2, "title": "Writing Expressions from Patterns", "concepts": ["variable expressions", "generalizing patterns"]},
+                {"number": 3, "title": "Introduction to Linear Equations", "concepts": ["y = mx + b", "slope", "y-intercept"]},
+                {"number": 4, "title": "Graphing Linear Equations", "concepts": ["coordinate plane", "plotting lines", "slope interpretation"]},
+                {"number": 5, "title": "Real-World Linear Relationships", "concepts": ["word problems", "modeling with equations", "making predictions"]}
+            ]
+        }
+    ]
+
+    for module_data in modules_data:
+        lessons_data = module_data.pop("lessons")
+
+        module = Module(subject_id=prealgebra.id, **module_data)
+        session.add(module)
+        session.flush()  # Get the module ID
+
+        for lesson_data in lessons_data:
+            lesson = Lesson(module_id=module.id, **lesson_data)
+            session.add(lesson)
+
+    session.commit()
+    print(f"Seeded Pre-Algebra with {len(modules_data)} modules.")

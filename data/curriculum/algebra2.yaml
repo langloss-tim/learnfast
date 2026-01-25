@@ -1,0 +1,292 @@
+subject:
+  code: ALGEBRA2
+  name: Algebra II
+  description: Advanced algebra covering polynomials, rational expressions, radicals, exponentials, and logarithms.
+  grade_level: 10
+  order: 5
+
+modules:
+  - number: 1
+    title: Equations and Inequalities Review
+    description: Strengthen algebraic foundations with advanced equation solving.
+    real_world_applications:
+      - Engineering calculations
+      - Physics problems
+      - Financial modeling
+      - Data analysis
+    lessons:
+      - number: 1
+        title: Solving Multi-Step Equations
+        concepts:
+          - complex equations
+          - rational coefficients
+          - absolute value equations
+      - number: 2
+        title: Solving Compound and Absolute Value Inequalities
+        concepts:
+          - compound inequalities
+          - absolute value inequalities
+          - interval notation
+      - number: 3
+        title: Solving Systems of Equations
+        concepts:
+          - three-variable systems
+          - matrix methods introduction
+          - applications
+
+  - number: 2
+    title: Quadratic Functions and Equations
+    description: Deep dive into quadratics including complex solutions.
+    real_world_applications:
+      - Projectile motion
+      - Revenue optimization
+      - Engineering design
+      - Signal processing
+    lessons:
+      - number: 1
+        title: Graphing Quadratic Functions
+        concepts:
+          - vertex form
+          - standard form
+          - transformations
+      - number: 2
+        title: Completing the Square
+        concepts:
+          - technique
+          - converting forms
+          - solving equations
+      - number: 3
+        title: The Quadratic Formula and Discriminant
+        concepts:
+          - derivation
+          - discriminant analysis
+          - nature of roots
+      - number: 4
+        title: Complex Numbers
+        concepts:
+          - imaginary unit
+          - operations with complex numbers
+          - complex solutions
+      - number: 5
+        title: Quadratic Inequalities
+        concepts:
+          - sign analysis
+          - graphical solutions
+          - interval solutions
+
+  - number: 3
+    title: Polynomial Functions
+    description: Explore higher-degree polynomials and their behaviors.
+    real_world_applications:
+      - Population modeling
+      - Cost analysis
+      - Volume calculations
+      - Roller coaster design
+    lessons:
+      - number: 1
+        title: Polynomial Operations
+        concepts:
+          - adding and subtracting
+          - multiplying polynomials
+          - polynomial long division
+      - number: 2
+        title: Factoring Polynomials
+        concepts:
+          - factor theorem
+          - synthetic division
+          - sum/difference of cubes
+      - number: 3
+        title: Zeros of Polynomial Functions
+        concepts:
+          - finding zeros
+          - multiplicity
+          - rational zero theorem
+      - number: 4
+        title: Graphing Polynomial Functions
+        concepts:
+          - end behavior
+          - turning points
+          - zeros and multiplicity
+      - number: 5
+        title: Polynomial Equations and Applications
+        concepts:
+          - solving polynomial equations
+          - modeling with polynomials
+          - optimization
+
+  - number: 4
+    title: Rational Expressions and Equations
+    description: Work with ratios of polynomials.
+    real_world_applications:
+      - Work rate problems
+      - Electrical circuits
+      - Concentration problems
+      - Average speed
+    lessons:
+      - number: 1
+        title: Simplifying Rational Expressions
+        concepts:
+          - factoring
+          - canceling common factors
+          - restrictions
+      - number: 2
+        title: Multiplying and Dividing Rational Expressions
+        concepts:
+          - multiplication
+          - division
+          - simplifying results
+      - number: 3
+        title: Adding and Subtracting Rational Expressions
+        concepts:
+          - common denominators
+          - LCD
+          - complex fractions
+      - number: 4
+        title: Solving Rational Equations
+        concepts:
+          - clearing denominators
+          - extraneous solutions
+          - applications
+
+  - number: 5
+    title: Radical Functions and Equations
+    description: Master operations with radicals and rational exponents.
+    real_world_applications:
+      - Distance calculations
+      - Physics formulas
+      - Engineering design
+      - Statistics (standard deviation)
+    lessons:
+      - number: 1
+        title: Rational Exponents
+        concepts:
+          - fractional exponents
+          - converting between forms
+          - simplifying
+      - number: 2
+        title: Simplifying Radical Expressions
+        concepts:
+          - product and quotient rules
+          - rationalizing denominators
+          - adding and subtracting radicals
+      - number: 3
+        title: Solving Radical Equations
+        concepts:
+          - isolating the radical
+          - squaring both sides
+          - checking solutions
+      - number: 4
+        title: Graphing Radical Functions
+        concepts:
+          - square root functions
+          - cube root functions
+          - transformations
+
+  - number: 6
+    title: Exponential Functions
+    description: Understand exponential growth and decay.
+    real_world_applications:
+      - Population growth
+      - Compound interest
+      - Radioactive decay
+      - Epidemiology
+    lessons:
+      - number: 1
+        title: Exponential Functions and Graphs
+        concepts:
+          - base and exponent
+          - graphing exponentials
+          - growth vs decay
+      - number: 2
+        title: Exponential Growth and Decay
+        concepts:
+          - growth factor
+          - decay factor
+          - modeling applications
+      - number: 3
+        title: The Number e
+        concepts:
+          - natural exponential function
+          - continuous growth
+          - compound interest
+      - number: 4
+        title: Solving Exponential Equations
+        concepts:
+          - same base method
+          - using logarithms
+          - applications
+
+  - number: 7
+    title: Logarithmic Functions
+    description: Master logarithms as inverses of exponentials.
+    real_world_applications:
+      - Sound intensity (decibels)
+      - Earthquake magnitude (Richter scale)
+      - pH in chemistry
+      - Information theory
+    lessons:
+      - number: 1
+        title: Introduction to Logarithms
+        concepts:
+          - logarithm definition
+          - converting between forms
+          - common and natural logs
+      - number: 2
+        title: Properties of Logarithms
+        concepts:
+          - product rule
+          - quotient rule
+          - power rule
+      - number: 3
+        title: Solving Logarithmic Equations
+        concepts:
+          - using properties
+          - exponentiating
+          - checking solutions
+      - number: 4
+        title: Graphing Logarithmic Functions
+        concepts:
+          - inverse relationship
+          - domain and range
+          - transformations
+      - number: 5
+        title: Applications of Logarithms
+        concepts:
+          - pH calculations
+          - decibels
+          - Richter scale
+          - half-life
+
+  - number: 8
+    title: Sequences and Series
+    description: Explore patterns in sequences and their sums.
+    real_world_applications:
+      - Financial planning
+      - Computer algorithms
+      - Music patterns
+      - Architecture
+    lessons:
+      - number: 1
+        title: Arithmetic Sequences
+        concepts:
+          - common difference
+          - nth term formula
+          - finding terms
+      - number: 2
+        title: Arithmetic Series
+        concepts:
+          - partial sums
+          - sum formula
+          - applications
+      - number: 3
+        title: Geometric Sequences
+        concepts:
+          - common ratio
+          - nth term formula
+          - applications
+      - number: 4
+        title: Geometric Series
+        concepts:
+          - finite sums
+          - infinite series
+          - convergence

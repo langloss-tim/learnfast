@@ -1,0 +1,348 @@
+subject:
+  code: GEOMETRY
+  name: Geometry
+  description: Explore geometric relationships, proofs, and applications with triangles, circles, and solids.
+  grade_level: 9
+  order: 4
+
+modules:
+  - number: 1
+    title: Foundations of Geometry
+    description: Build the language and tools of geometric reasoning.
+    real_world_applications:
+      - Architecture
+      - Navigation
+      - Art and design
+      - Computer graphics
+    lessons:
+      - number: 1
+        title: Points, Lines, and Planes
+        concepts:
+          - undefined terms
+          - collinear and coplanar points
+          - intersections
+      - number: 2
+        title: Segments and Distance
+        concepts:
+          - segment addition
+          - midpoint formula
+          - distance formula
+      - number: 3
+        title: Angles and Angle Measures
+        concepts:
+          - angle types
+          - angle addition
+          - angle bisectors
+      - number: 4
+        title: Introduction to Proofs
+        concepts:
+          - inductive reasoning
+          - deductive reasoning
+          - conditional statements
+      - number: 5
+        title: Two-Column Proofs
+        concepts:
+          - proof structure
+          - properties and postulates
+          - writing proofs
+
+  - number: 2
+    title: Parallel and Perpendicular Lines
+    description: Explore angle relationships with parallel lines.
+    real_world_applications:
+      - Road design
+      - Building construction
+      - Railroad tracks
+      - Shadow problems
+    lessons:
+      - number: 1
+        title: Parallel Lines and Transversals
+        concepts:
+          - corresponding angles
+          - alternate interior angles
+          - same-side interior angles
+      - number: 2
+        title: Proving Lines Parallel
+        concepts:
+          - converse theorems
+          - writing proofs
+          - applications
+      - number: 3
+        title: Perpendicular Lines
+        concepts:
+          - perpendicular bisector
+          - distance from point to line
+          - constructions
+      - number: 4
+        title: Slopes of Parallel and Perpendicular Lines
+        concepts:
+          - parallel slopes
+          - perpendicular slopes
+          - equations of lines
+
+  - number: 3
+    title: Triangle Fundamentals
+    description: Study triangle properties and congruence.
+    real_world_applications:
+      - Engineering structures
+      - Surveying
+      - Navigation
+      - Art composition
+    lessons:
+      - number: 1
+        title: Classifying Triangles
+        concepts:
+          - by sides
+          - by angles
+          - triangle inequality
+      - number: 2
+        title: Angle Relationships in Triangles
+        concepts:
+          - angle sum theorem
+          - exterior angles
+          - remote interior angles
+      - number: 3
+        title: Congruent Triangles
+        concepts:
+          - congruence statements
+          - corresponding parts
+          - CPCTC
+      - number: 4
+        title: Triangle Congruence Theorems
+        concepts:
+          - SSS, SAS, ASA, AAS
+          - HL theorem
+          - proving triangles congruent
+      - number: 5
+        title: Isoceles and Equilateral Triangles
+        concepts:
+          - base angles theorem
+          - equilateral properties
+          - applications
+
+  - number: 4
+    title: Special Triangle Segments
+    description: Explore medians, altitudes, and other special segments.
+    real_world_applications:
+      - Center of mass
+      - Building design
+      - Optimal locations
+      - Engineering
+    lessons:
+      - number: 1
+        title: Perpendicular Bisectors and Angle Bisectors
+        concepts:
+          - circumcenter
+          - incenter
+          - constructions
+      - number: 2
+        title: Medians and Altitudes
+        concepts:
+          - centroid
+          - orthocenter
+          - properties
+      - number: 3
+        title: Midsegment Theorem
+        concepts:
+          - midsegment properties
+          - applications
+          - proofs
+      - number: 4
+        title: Triangle Inequalities
+        concepts:
+          - side-angle relationships
+          - hinge theorem
+          - applications
+
+  - number: 5
+    title: Similarity
+    description: Understand and apply similar figures.
+    real_world_applications:
+      - Scale drawings
+      - Map reading
+      - Photography
+      - Indirect measurement
+    lessons:
+      - number: 1
+        title: Ratios and Proportions in Geometry
+        concepts:
+          - setting up proportions
+          - geometric mean
+          - properties
+      - number: 2
+        title: Similar Polygons
+        concepts:
+          - similarity ratio
+          - corresponding parts
+          - scale factor
+      - number: 3
+        title: Proving Triangles Similar
+        concepts:
+          - AA, SSS, SAS similarity
+          - writing proofs
+      - number: 4
+        title: Proportionality Theorems
+        concepts:
+          - triangle proportionality
+          - parallel lines and transversals
+          - angle bisector theorem
+      - number: 5
+        title: Applications of Similarity
+        concepts:
+          - indirect measurement
+          - scale drawings
+          - similar solids
+
+  - number: 6
+    title: Right Triangles and Trigonometry
+    description: Master the Pythagorean theorem and trigonometric ratios.
+    real_world_applications:
+      - Construction
+      - Navigation
+      - Physics
+      - Surveying
+    lessons:
+      - number: 1
+        title: The Pythagorean Theorem
+        concepts:
+          - theorem and proof
+          - converse
+          - applications
+      - number: 2
+        title: Special Right Triangles
+        concepts:
+          - 45-45-90 triangles
+          - 30-60-90 triangles
+          - patterns and shortcuts
+      - number: 3
+        title: Trigonometric Ratios
+        concepts:
+          - sine, cosine, tangent
+          - SOH-CAH-TOA
+          - finding ratios
+      - number: 4
+        title: Solving Right Triangles
+        concepts:
+          - finding missing sides
+          - finding missing angles
+          - applications
+      - number: 5
+        title: Angles of Elevation and Depression
+        concepts:
+          - definitions
+          - solving problems
+          - real-world applications
+
+  - number: 7
+    title: Quadrilaterals
+    description: Study properties of four-sided figures.
+    real_world_applications:
+      - Architecture
+      - Tile patterns
+      - Engineering
+      - Art and design
+    lessons:
+      - number: 1
+        title: Properties of Parallelograms
+        concepts:
+          - opposite sides and angles
+          - diagonals
+          - proving parallelograms
+      - number: 2
+        title: Special Parallelograms
+        concepts:
+          - rectangles
+          - rhombuses
+          - squares
+      - number: 3
+        title: Trapezoids and Kites
+        concepts:
+          - trapezoid properties
+          - isoceles trapezoids
+          - kite properties
+      - number: 4
+        title: Coordinate Proofs
+        concepts:
+          - placing figures on coordinate plane
+          - using distance and slope
+          - proving properties
+
+  - number: 8
+    title: Circles
+    description: Explore circle properties and relationships.
+    real_world_applications:
+      - Wheel design
+      - Clocks
+      - Satellites
+      - Optics
+    lessons:
+      - number: 1
+        title: Circle Basics
+        concepts:
+          - parts of a circle
+          - central angles
+          - arc measures
+      - number: 2
+        title: Arc Length and Sector Area
+        concepts:
+          - arc length formula
+          - sector area formula
+          - applications
+      - number: 3
+        title: Inscribed Angles
+        concepts:
+          - inscribed angle theorem
+          - angles in semicircles
+          - inscribed quadrilaterals
+      - number: 4
+        title: Chords, Secants, and Tangents
+        concepts:
+          - chord properties
+          - secant-tangent relationships
+          - angles formed
+      - number: 5
+        title: Equations of Circles
+        concepts:
+          - standard form
+          - graphing circles
+          - writing equations
+
+  - number: 9
+    title: Area and Volume
+    description: Calculate areas and volumes of various figures.
+    real_world_applications:
+      - Construction
+      - Packaging
+      - Landscaping
+      - Manufacturing
+    lessons:
+      - number: 1
+        title: Areas of Polygons
+        concepts:
+          - triangles and quadrilaterals
+          - regular polygons
+          - composite figures
+      - number: 2
+        title: Surface Area of Prisms and Cylinders
+        concepts:
+          - lateral area
+          - total surface area
+          - applications
+      - number: 3
+        title: Surface Area of Pyramids, Cones, and Spheres
+        concepts:
+          - lateral area
+          - total surface area
+          - formulas
+      - number: 4
+        title: Volume of Prisms and Cylinders
+        concepts:
+          - volume formulas
+          - cavalieri's principle
+          - applications
+      - number: 5
+        title: Volume of Pyramids, Cones, and Spheres
+        concepts:
+          - volume formulas
+          - relationships
+          - applications

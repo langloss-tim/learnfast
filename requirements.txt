@@ -1,0 +1,29 @@
+# Pre-Algebra Learning System Dependencies
+
+# Claude API for content generation and vision grading
+anthropic>=0.40.0
+
+# Web dashboard
+streamlit>=1.30.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# PDF generation
+reportlab>=4.0.0
+
+# Folder monitoring for scans
+watchdog>=4.0.0
+
+# QR code handling
+pyzbar>=0.1.9
+qrcode>=7.4.0
+
+# Image processing
+pillow>=10.0.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# CLI
+click>=8.1.0

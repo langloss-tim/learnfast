@@ -1,0 +1,348 @@
+subject:
+  code: 4TH_GRADE
+  name: 4th Grade Math
+  description: Build strong foundations in multi-digit operations, fractions, and geometric thinking.
+  grade_level: 4
+  order: 1
+
+modules:
+  - number: 1
+    title: Place Value and Multi-Digit Operations
+    description: Understand place value to millions and master multi-digit addition and subtraction.
+    real_world_applications:
+      - Population of cities
+      - Distances between places
+      - Sports statistics
+      - Bank accounts
+    lessons:
+      - number: 1
+        title: Place Value to Millions
+        concepts:
+          - ones through millions
+          - expanded form
+          - comparing numbers
+          - rounding
+      - number: 2
+        title: Multi-Digit Addition
+        concepts:
+          - regrouping
+          - estimating sums
+          - checking with inverse
+      - number: 3
+        title: Multi-Digit Subtraction
+        concepts:
+          - borrowing
+          - subtracting across zeros
+          - estimating differences
+      - number: 4
+        title: Problem Solving with Addition and Subtraction
+        concepts:
+          - word problems
+          - choosing operations
+          - multi-step problems
+
+  - number: 2
+    title: Multiplication
+    description: Master multi-digit multiplication with understanding.
+    real_world_applications:
+      - Calculating costs (price x quantity)
+      - Area of rectangular spaces
+      - Scheduling (hours per day x days)
+      - Array problems
+    lessons:
+      - number: 1
+        title: Multiplication Facts and Patterns
+        concepts:
+          - fact families
+          - patterns in multiples
+          - properties of multiplication
+      - number: 2
+        title: Multiplying by 10s, 100s, and 1000s
+        concepts:
+          - place value patterns
+          - mental math strategies
+      - number: 3
+        title: Multiplying Two-Digit by One-Digit
+        concepts:
+          - partial products
+          - standard algorithm
+          - area model
+      - number: 4
+        title: Multiplying Two-Digit by Two-Digit
+        concepts:
+          - expanded algorithm
+          - standard algorithm
+          - estimating products
+      - number: 5
+        title: Multiplication Word Problems
+        concepts:
+          - identifying multiplication situations
+          - multi-step problems
+          - reasonableness
+
+  - number: 3
+    title: Division
+    description: Understand division and solve multi-digit problems.
+    real_world_applications:
+      - Fair sharing
+      - Grouping items
+      - Finding rates
+      - Equal distribution
+    lessons:
+      - number: 1
+        title: Understanding Division
+        concepts:
+          - division as sharing
+          - division as grouping
+          - relationship to multiplication
+      - number: 2
+        title: Division Facts and Patterns
+        concepts:
+          - fact families
+          - dividing by 10s
+          - mental math
+      - number: 3
+        title: Long Division with One-Digit Divisors
+        concepts:
+          - divide
+          - multiply
+          - subtract
+          - bring down
+      - number: 4
+        title: Remainders
+        concepts:
+          - interpreting remainders
+          - checking with multiplication
+          - word problems with remainders
+      - number: 5
+        title: Division Word Problems
+        concepts:
+          - identifying division situations
+          - multi-step problems
+          - estimation
+
+  - number: 4
+    title: Factors and Multiples
+    description: Explore number relationships through factors and multiples.
+    real_world_applications:
+      - Arranging items in rows
+      - Finding common schedules
+      - Equal grouping
+      - Divisibility
+    lessons:
+      - number: 1
+        title: Understanding Factors
+        concepts:
+          - factor pairs
+          - listing all factors
+          - prime vs composite
+      - number: 2
+        title: Prime and Composite Numbers
+        concepts:
+          - prime numbers
+          - composite numbers
+          - prime factorization
+      - number: 3
+        title: Understanding Multiples
+        concepts:
+          - skip counting
+          - common multiples
+          - least common multiple
+      - number: 4
+        title: Factor and Multiple Problem Solving
+        concepts:
+          - GCF applications
+          - LCM applications
+          - number puzzles
+
+  - number: 5
+    title: Fractions - Concepts
+    description: Develop deep understanding of fractions and equivalence.
+    real_world_applications:
+      - Sharing pizza or pie
+      - Measuring ingredients
+      - Parts of a whole
+      - Music note values
+    lessons:
+      - number: 1
+        title: Understanding Fractions
+        concepts:
+          - parts of a whole
+          - fractions on a number line
+          - unit fractions
+      - number: 2
+        title: Equivalent Fractions
+        concepts:
+          - visual models
+          - multiplying/dividing to find equivalents
+          - simplifying fractions
+      - number: 3
+        title: Comparing Fractions
+        concepts:
+          - same denominator
+          - same numerator
+          - benchmark fractions
+          - using number lines
+      - number: 4
+        title: Mixed Numbers and Improper Fractions
+        concepts:
+          - converting between forms
+          - comparing mixed numbers
+          - fractions greater than 1
+
+  - number: 6
+    title: Fractions - Operations
+    description: Add and subtract fractions with like denominators.
+    real_world_applications:
+      - Combining recipe measurements
+      - Distance problems
+      - Time problems
+      - Pizza sharing
+    lessons:
+      - number: 1
+        title: Adding Fractions with Like Denominators
+        concepts:
+          - visual models
+          - adding numerators
+          - simplifying sums
+      - number: 2
+        title: Subtracting Fractions with Like Denominators
+        concepts:
+          - visual models
+          - subtracting numerators
+          - simplifying differences
+      - number: 3
+        title: Adding and Subtracting Mixed Numbers
+        concepts:
+          - with like denominators
+          - regrouping with mixed numbers
+      - number: 4
+        title: Multiplying Fractions by Whole Numbers
+        concepts:
+          - repeated addition
+          - visual models
+          - the multiplication shortcut
+      - number: 5
+        title: Fraction Word Problems
+        concepts:
+          - identifying operations
+          - multi-step problems
+          - drawing models
+
+  - number: 7
+    title: Decimals
+    description: Understand decimals as another way to represent fractions.
+    real_world_applications:
+      - Money (dollars and cents)
+      - Measurements (meters)
+      - Sports statistics
+      - Scientific measurements
+    lessons:
+      - number: 1
+        title: Understanding Decimals
+        concepts:
+          - tenths
+          - hundredths
+          - place value
+          - reading and writing decimals
+      - number: 2
+        title: Comparing and Ordering Decimals
+        concepts:
+          - using place value
+          - using number lines
+          - ordering multiple decimals
+      - number: 3
+        title: Relating Decimals and Fractions
+        concepts:
+          - tenths as decimals
+          - hundredths as decimals
+          - converting between forms
+      - number: 4
+        title: Adding and Subtracting Decimals
+        concepts:
+          - lining up decimal points
+          - using place value
+          - money problems
+
+  - number: 8
+    title: Measurement
+    description: Convert units and solve measurement problems.
+    real_world_applications:
+      - Cooking conversions
+      - Distance and travel
+      - Weight and capacity
+      - Time calculations
+    lessons:
+      - number: 1
+        title: Customary Length
+        concepts:
+          - inches, feet, yards, miles
+          - converting between units
+          - measuring to nearest 1/4 inch
+      - number: 2
+        title: Customary Capacity and Weight
+        concepts:
+          - cups, pints, quarts, gallons
+          - ounces and pounds
+          - conversions
+      - number: 3
+        title: Metric Units
+        concepts:
+          - meters, centimeters, kilometers
+          - grams and kilograms
+          - liters and milliliters
+      - number: 4
+        title: Time
+        concepts:
+          - elapsed time
+          - converting hours/minutes/seconds
+          - time word problems
+      - number: 5
+        title: Perimeter and Area
+        concepts:
+          - perimeter of rectangles
+          - area of rectangles
+          - finding missing sides
+
+  - number: 9
+    title: Geometry
+    description: Classify shapes and understand angles.
+    real_world_applications:
+      - Architecture
+      - Art and design
+      - Maps and directions
+      - Building and construction
+    lessons:
+      - number: 1
+        title: Points, Lines, and Rays
+        concepts:
+          - points
+          - lines
+          - line segments
+          - rays
+          - parallel and perpendicular
+      - number: 2
+        title: Angles
+        concepts:
+          - measuring angles
+          - acute, right, obtuse
+          - angle relationships
+      - number: 3
+        title: Classifying Triangles
+        concepts:
+          - by sides (equilateral, isoceles, scalene)
+          - by angles (acute, right, obtuse)
+      - number: 4
+        title: Classifying Quadrilaterals
+        concepts:
+          - parallelograms
+          - rectangles
+          - squares
+          - rhombuses
+          - trapezoids
+      - number: 5
+        title: Symmetry
+        concepts:
+          - lines of symmetry
+          - identifying symmetry
+          - drawing symmetric figures

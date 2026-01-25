@@ -1,0 +1,294 @@
+subject:
+  code: ALGEBRA1
+  name: Algebra I
+  description: First formal algebra course - master linear equations, inequalities, systems, and introduction to quadratics.
+  grade_level: 8
+  order: 3
+
+modules:
+  - number: 1
+    title: Foundations of Algebra
+    description: Review and extend pre-algebra concepts for algebraic work.
+    real_world_applications:
+      - Scientific formulas
+      - Computer programming
+      - Engineering calculations
+      - Financial planning
+    lessons:
+      - number: 1
+        title: Real Number System
+        concepts:
+          - rational numbers
+          - irrational numbers
+          - number line
+          - absolute value
+      - number: 2
+        title: Properties of Real Numbers
+        concepts:
+          - commutative property
+          - associative property
+          - distributive property
+          - identity and inverse
+      - number: 3
+        title: Operations with Real Numbers
+        concepts:
+          - adding and subtracting
+          - multiplying and dividing
+          - order of operations
+      - number: 4
+        title: Exponents and Square Roots
+        concepts:
+          - integer exponents
+          - laws of exponents
+          - perfect squares
+          - simplifying square roots
+
+  - number: 2
+    title: Solving Linear Equations
+    description: Master techniques for solving all types of linear equations.
+    real_world_applications:
+      - Finding unknown quantities
+      - Business break-even analysis
+      - Physics formulas
+      - Mixture problems
+    lessons:
+      - number: 1
+        title: One-Step and Two-Step Equations
+        concepts:
+          - inverse operations
+          - solving for variable
+          - checking solutions
+      - number: 2
+        title: Multi-Step Equations
+        concepts:
+          - combining like terms
+          - distributive property
+          - variables on both sides
+      - number: 3
+        title: Equations with Special Cases
+        concepts:
+          - no solution
+          - all real numbers
+          - identity equations
+      - number: 4
+        title: Literal Equations and Formulas
+        concepts:
+          - solving for a variable
+          - rearranging formulas
+          - applications
+      - number: 5
+        title: Equation Word Problems
+        concepts:
+          - translating words to equations
+          - number problems
+          - consecutive integers
+
+  - number: 3
+    title: Solving Inequalities
+    description: Extend equation-solving skills to inequalities.
+    real_world_applications:
+      - Budget constraints
+      - Speed limits
+      - Quality control ranges
+      - Age restrictions
+    lessons:
+      - number: 1
+        title: Graphing Inequalities
+        concepts:
+          - inequality symbols
+          - open vs closed circles
+          - number line graphs
+      - number: 2
+        title: Solving One-Step and Two-Step Inequalities
+        concepts:
+          - addition/subtraction
+          - multiplication/division
+          - reversing the inequality
+      - number: 3
+        title: Multi-Step Inequalities
+        concepts:
+          - combining like terms
+          - distributive property
+          - special cases
+      - number: 4
+        title: Compound Inequalities
+        concepts:
+          - AND inequalities
+          - OR inequalities
+          - graphing compound inequalities
+      - number: 5
+        title: Absolute Value Equations and Inequalities
+        concepts:
+          - absolute value equations
+          - absolute value inequalities
+          - compound solution sets
+
+  - number: 4
+    title: Linear Functions
+    description: Understand and graph linear relationships.
+    real_world_applications:
+      - Cost analysis
+      - Distance-time relationships
+      - Temperature conversions
+      - Depreciation
+    lessons:
+      - number: 1
+        title: Introduction to Functions
+        concepts:
+          - function definition
+          - domain and range
+          - function notation
+          - evaluating functions
+      - number: 2
+        title: Slope of a Line
+        concepts:
+          - rise over run
+          - slope formula
+          - positive, negative, zero, undefined slope
+      - number: 3
+        title: Slope-Intercept Form
+        concepts:
+          - y = mx + b
+          - identifying slope and intercept
+          - graphing from equation
+      - number: 4
+        title: Point-Slope Form
+        concepts:
+          - y - y1 = m(x - x1)
+          - writing equations
+          - converting between forms
+      - number: 5
+        title: Standard Form and Intercepts
+        concepts:
+          - Ax + By = C
+          - finding intercepts
+          - graphing using intercepts
+      - number: 6
+        title: Linear Function Applications
+        concepts:
+          - modeling real situations
+          - interpreting slope and intercept
+          - making predictions
+
+  - number: 5
+    title: Systems of Linear Equations
+    description: Solve problems with multiple equations and variables.
+    real_world_applications:
+      - Comparing phone plans
+      - Mixture problems
+      - Break-even analysis
+      - Motion problems
+    lessons:
+      - number: 1
+        title: Solving by Graphing
+        concepts:
+          - graphing both equations
+          - finding intersection
+          - estimating solutions
+      - number: 2
+        title: Solving by Substitution
+        concepts:
+          - isolating a variable
+          - substituting into other equation
+          - solving and back-substituting
+      - number: 3
+        title: Solving by Elimination
+        concepts:
+          - adding equations
+          - multiplying to eliminate
+          - choosing efficient methods
+      - number: 4
+        title: Special Cases in Systems
+        concepts:
+          - no solution (parallel lines)
+          - infinitely many solutions
+          - identifying from equations
+      - number: 5
+        title: Systems Word Problems
+        concepts:
+          - setting up two equations
+          - digit problems
+          - coin problems
+          - mixture problems
+
+  - number: 6
+    title: Exponents and Polynomials
+    description: Work with polynomial expressions and operations.
+    real_world_applications:
+      - Area calculations
+      - Volume formulas
+      - Scientific notation
+      - Computer memory
+    lessons:
+      - number: 1
+        title: Laws of Exponents
+        concepts:
+          - product rule
+          - quotient rule
+          - power rule
+          - negative exponents
+      - number: 2
+        title: Scientific Notation
+        concepts:
+          - writing in scientific notation
+          - operations with scientific notation
+          - real-world applications
+      - number: 3
+        title: Polynomials and Their Operations
+        concepts:
+          - classifying polynomials
+          - adding and subtracting
+          - multiplying polynomials
+      - number: 4
+        title: Special Products
+        concepts:
+          - square of a binomial
+          - difference of squares
+          - FOIL method
+      - number: 5
+        title: Factoring Polynomials
+        concepts:
+          - GCF factoring
+          - factoring trinomials
+          - difference of squares
+
+  - number: 7
+    title: Quadratic Functions
+    description: Introduction to parabolas and quadratic relationships.
+    real_world_applications:
+      - Projectile motion
+      - Area optimization
+      - Revenue maximization
+      - Bridge arches
+    lessons:
+      - number: 1
+        title: Graphing Quadratic Functions
+        concepts:
+          - parabola shape
+          - vertex
+          - axis of symmetry
+          - direction of opening
+      - number: 2
+        title: Solving Quadratics by Factoring
+        concepts:
+          - zero product property
+          - setting equation to zero
+          - finding solutions
+      - number: 3
+        title: Solving Quadratics by Square Roots
+        concepts:
+          - isolating the squared term
+          - taking square roots
+          - plus/minus solutions
+      - number: 4
+        title: The Quadratic Formula
+        concepts:
+          - formula derivation
+          - discriminant
+          - applying the formula
+      - number: 5
+        title: Quadratic Word Problems
+        concepts:
+          - projectile motion
+          - area problems
+          - optimization

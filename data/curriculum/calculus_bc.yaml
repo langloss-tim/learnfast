@@ -1,0 +1,321 @@
+subject:
+  code: CALCULUS_BC
+  name: Calculus BC
+  description: Advanced calculus covering all AB topics plus sequences, series, parametrics, and polars for AP Calculus BC.
+  grade_level: 12
+  order: 8
+
+modules:
+  - number: 1
+    title: Advanced Integration Techniques
+    description: Master sophisticated integration methods.
+    real_world_applications:
+      - Physics
+      - Engineering
+      - Probability
+      - Signal processing
+    lessons:
+      - number: 1
+        title: Integration by Parts
+        concepts:
+          - formula derivation
+          - choosing u and dv
+          - repeated integration
+      - number: 2
+        title: Trigonometric Integrals
+        concepts:
+          - powers of sine and cosine
+          - products of trig functions
+          - reduction formulas
+      - number: 3
+        title: Trigonometric Substitution
+        concepts:
+          - recognizing forms
+          - substitution techniques
+          - completing the square
+      - number: 4
+        title: Partial Fractions
+        concepts:
+          - distinct linear factors
+          - repeated factors
+          - irreducible quadratics
+      - number: 5
+        title: Improper Integrals
+        concepts:
+          - infinite limits
+          - discontinuous integrands
+          - convergence tests
+
+  - number: 2
+    title: Differential Equations
+    description: Solve and apply differential equations.
+    real_world_applications:
+      - Population growth
+      - Radioactive decay
+      - Newton's law of cooling
+      - Circuit analysis
+    lessons:
+      - number: 1
+        title: Introduction to Differential Equations
+        concepts:
+          - general and particular solutions
+          - initial conditions
+          - solution verification
+      - number: 2
+        title: Slope Fields
+        concepts:
+          - graphical solutions
+          - sketching slope fields
+          - interpreting solutions
+      - number: 3
+        title: Euler's Method
+        concepts:
+          - numerical approximation
+          - step size
+          - error analysis
+      - number: 4
+        title: Separable Differential Equations
+        concepts:
+          - separation of variables
+          - solving initial value problems
+          - applications
+      - number: 5
+        title: Exponential Growth and Decay
+        concepts:
+          - growth/decay models
+          - half-life
+          - Newton's law of cooling
+      - number: 6
+        title: Logistic Growth
+        concepts:
+          - logistic equation
+          - carrying capacity
+          - applications
+
+  - number: 3
+    title: Parametric Equations
+    description: Study curves defined parametrically.
+    real_world_applications:
+      - Projectile motion
+      - Computer graphics
+      - Animation
+      - Physics
+    lessons:
+      - number: 1
+        title: Parametric Curves
+        concepts:
+          - defining parametric equations
+          - graphing
+          - eliminating parameter
+      - number: 2
+        title: Calculus with Parametric Equations
+        concepts:
+          - dy/dx from parametric
+          - second derivatives
+          - tangent lines
+      - number: 3
+        title: Arc Length with Parametric Equations
+        concepts:
+          - arc length formula
+          - computing arc length
+          - applications
+      - number: 4
+        title: Surface Area with Parametric Equations
+        concepts:
+          - surface area formula
+          - revolution surfaces
+          - applications
+
+  - number: 4
+    title: Polar Coordinates
+    description: Explore polar coordinate system and calculus.
+    real_world_applications:
+      - Radar systems
+      - Spiral patterns
+      - Astronomy
+      - Engineering
+    lessons:
+      - number: 1
+        title: Polar Coordinate System
+        concepts:
+          - polar coordinates
+          - converting coordinates
+          - plotting points
+      - number: 2
+        title: Polar Curves
+        concepts:
+          - common polar curves
+          - graphing techniques
+          - symmetry
+      - number: 3
+        title: Calculus in Polar Coordinates
+        concepts:
+          - dy/dx in polar
+          - tangent lines
+          - slope formulas
+      - number: 4
+        title: Area in Polar Coordinates
+        concepts:
+          - area formula
+          - area between curves
+          - applications
+      - number: 5
+        title: Arc Length in Polar Coordinates
+        concepts:
+          - arc length formula
+          - computing length
+          - applications
+
+  - number: 5
+    title: Sequences
+    description: Study infinite sequences and their properties.
+    real_world_applications:
+      - Computer science
+      - Finance
+      - Population modeling
+      - Approximations
+    lessons:
+      - number: 1
+        title: Introduction to Sequences
+        concepts:
+          - sequence definition
+          - explicit formulas
+          - recursive formulas
+      - number: 2
+        title: Limits of Sequences
+        concepts:
+          - convergence
+          - divergence
+          - limit laws
+      - number: 3
+        title: Monotonic and Bounded Sequences
+        concepts:
+          - monotonicity
+          - boundedness
+          - convergence theorem
+      - number: 4
+        title: Special Sequences
+        concepts:
+          - factorial sequences
+          - geometric sequences
+          - famous sequences
+
+  - number: 6
+    title: Infinite Series
+    description: Understand infinite sums and their convergence.
+    real_world_applications:
+      - Signal processing
+      - Physics
+      - Numerical methods
+      - Probability
+    lessons:
+      - number: 1
+        title: Introduction to Series
+        concepts:
+          - partial sums
+          - convergence/divergence
+          - geometric series
+      - number: 2
+        title: The Integral Test
+        concepts:
+          - test conditions
+          - applying the test
+          - p-series
+      - number: 3
+        title: Comparison Tests
+        concepts:
+          - direct comparison
+          - limit comparison
+          - applications
+      - number: 4
+        title: Alternating Series
+        concepts:
+          - alternating series test
+          - error bounds
+          - conditional convergence
+      - number: 5
+        title: Ratio and Root Tests
+        concepts:
+          - ratio test
+          - root test
+          - choosing tests
+      - number: 6
+        title: Absolute vs Conditional Convergence
+        concepts:
+          - absolute convergence
+          - conditional convergence
+          - rearrangement
+
+  - number: 7
+    title: Power Series
+    description: Work with functions represented as power series.
+    real_world_applications:
+      - Function approximation
+      - Numerical computation
+      - Physics
+      - Engineering
+    lessons:
+      - number: 1
+        title: Power Series and Convergence
+        concepts:
+          - power series definition
+          - radius of convergence
+          - interval of convergence
+      - number: 2
+        title: Representing Functions as Power Series
+        concepts:
+          - geometric series manipulation
+          - differentiation and integration
+          - substitution
+      - number: 3
+        title: Taylor and Maclaurin Series
+        concepts:
+          - Taylor polynomial derivation
+          - common Maclaurin series
+          - Taylor series
+      - number: 4
+        title: Taylor Series Applications
+        concepts:
+          - approximations
+          - error bounds
+          - Lagrange error bound
+      - number: 5
+        title: Operations with Power Series
+        concepts:
+          - addition and subtraction
+          - multiplication
+          - composition
+
+  - number: 8
+    title: Advanced Applications
+    description: Apply calculus to advanced problems.
+    real_world_applications:
+      - Physics
+      - Engineering
+      - Economics
+      - Biology
+    lessons:
+      - number: 1
+        title: L'Hopital's Rule
+        concepts:
+          - indeterminate forms
+          - applying the rule
+          - repeated application
+      - number: 2
+        title: Vector-Valued Functions
+        concepts:
+          - parametric vectors
+          - derivatives of vectors
+          - integrals of vectors
+      - number: 3
+        title: Motion in Space
+        concepts:
+          - position, velocity, acceleration
+          - speed
+          - projectile motion
+      - number: 4
+        title: Review and Synthesis
+        concepts:
+          - connecting concepts
+          - problem-solving strategies
+          - AP exam preparation

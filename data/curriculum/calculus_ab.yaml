@@ -1,0 +1,316 @@
+subject:
+  code: CALCULUS_AB
+  name: Calculus AB
+  description: First-year calculus covering limits, derivatives, and integrals for AP Calculus AB.
+  grade_level: 12
+  order: 7
+
+modules:
+  - number: 1
+    title: Limits and Continuity
+    description: Foundation of calculus through limits.
+    real_world_applications:
+      - Instantaneous velocity
+      - Population modeling
+      - Physics
+      - Engineering
+    lessons:
+      - number: 1
+        title: Introduction to Limits
+        concepts:
+          - limit definition
+          - graphical interpretation
+          - numerical approach
+      - number: 2
+        title: Limit Laws
+        concepts:
+          - sum and difference
+          - product and quotient
+          - power and root
+      - number: 3
+        title: Evaluating Limits Algebraically
+        concepts:
+          - direct substitution
+          - factoring
+          - rationalizing
+          - special limits
+      - number: 4
+        title: Continuity
+        concepts:
+          - definition of continuity
+          - types of discontinuity
+          - intermediate value theorem
+      - number: 5
+        title: Limits Involving Infinity
+        concepts:
+          - limits at infinity
+          - infinite limits
+          - horizontal asymptotes
+
+  - number: 2
+    title: Definition of the Derivative
+    description: Understand derivatives as rates of change.
+    real_world_applications:
+      - Velocity and acceleration
+      - Marginal cost
+      - Rate of change
+      - Physics
+    lessons:
+      - number: 1
+        title: Average Rate of Change
+        concepts:
+          - secant lines
+          - average velocity
+          - difference quotient
+      - number: 2
+        title: Instantaneous Rate of Change
+        concepts:
+          - tangent lines
+          - limit definition
+          - derivative notation
+      - number: 3
+        title: The Derivative Function
+        concepts:
+          - derivative as function
+          - graphing derivatives
+          - differentiability
+      - number: 4
+        title: Differentiability and Continuity
+        concepts:
+          - differentiable implies continuous
+          - non-differentiable points
+          - corners, cusps, verticals
+
+  - number: 3
+    title: Differentiation Rules
+    description: Master the techniques of differentiation.
+    real_world_applications:
+      - Physics problems
+      - Economics
+      - Engineering
+      - Biology
+    lessons:
+      - number: 1
+        title: Basic Differentiation Rules
+        concepts:
+          - constant rule
+          - power rule
+          - sum and difference rules
+      - number: 2
+        title: Product and Quotient Rules
+        concepts:
+          - product rule
+          - quotient rule
+          - applications
+      - number: 3
+        title: Derivatives of Trigonometric Functions
+        concepts:
+          - sine and cosine
+          - other trig functions
+          - applications
+      - number: 4
+        title: The Chain Rule
+        concepts:
+          - composite functions
+          - chain rule application
+          - nested functions
+      - number: 5
+        title: Derivatives of Exponential and Logarithmic Functions
+        concepts:
+          - e^x derivative
+          - natural log derivative
+          - general exponentials and logs
+
+  - number: 4
+    title: Implicit Differentiation and Related Rates
+    description: Differentiate implicitly and solve related rates problems.
+    real_world_applications:
+      - Related motion problems
+      - Geometric problems
+      - Physics
+      - Engineering
+    lessons:
+      - number: 1
+        title: Implicit Differentiation
+        concepts:
+          - implicit vs explicit
+          - differentiating implicitly
+          - finding tangent lines
+      - number: 2
+        title: Derivatives of Inverse Functions
+        concepts:
+          - inverse function theorem
+          - inverse trig derivatives
+          - applications
+      - number: 3
+        title: Related Rates
+        concepts:
+          - setting up problems
+          - differentiating equations
+          - solving for rates
+      - number: 4
+        title: Related Rates Applications
+        concepts:
+          - geometric problems
+          - distance problems
+          - rate of change problems
+
+  - number: 5
+    title: Applications of Derivatives
+    description: Use derivatives to analyze functions.
+    real_world_applications:
+      - Optimization
+      - Motion analysis
+      - Business applications
+      - Scientific modeling
+    lessons:
+      - number: 1
+        title: Extreme Values
+        concepts:
+          - absolute extrema
+          - relative extrema
+          - critical points
+      - number: 2
+        title: Mean Value Theorem
+        concepts:
+          - Rolle's theorem
+          - mean value theorem
+          - applications
+      - number: 3
+        title: First Derivative Test
+        concepts:
+          - increasing/decreasing
+          - finding local extrema
+          - intervals
+      - number: 4
+        title: Second Derivative Test
+        concepts:
+          - concavity
+          - inflection points
+          - classifying extrema
+      - number: 5
+        title: Curve Sketching
+        concepts:
+          - combining analysis
+          - drawing accurate graphs
+          - behavior at limits
+      - number: 6
+        title: Optimization Problems
+        concepts:
+          - setting up problems
+          - finding extrema
+          - applications
+
+  - number: 6
+    title: Introduction to Integration
+    description: Understand integration as antidifferentiation and area.
+    real_world_applications:
+      - Area calculations
+      - Displacement
+      - Accumulation
+      - Physics
+    lessons:
+      - number: 1
+        title: Antiderivatives
+        concepts:
+          - antiderivative definition
+          - basic antiderivatives
+          - indefinite integrals
+      - number: 2
+        title: Riemann Sums
+        concepts:
+          - left, right, midpoint sums
+          - approximating area
+          - sigma notation
+      - number: 3
+        title: The Definite Integral
+        concepts:
+          - definition
+          - properties
+          - interpretation as area
+      - number: 4
+        title: The Fundamental Theorem of Calculus Part 1
+        concepts:
+          - accumulation functions
+          - derivative of integral
+          - applications
+      - number: 5
+        title: The Fundamental Theorem of Calculus Part 2
+        concepts:
+          - evaluation theorem
+          - computing definite integrals
+          - net change theorem
+
+  - number: 7
+    title: Integration Techniques
+    description: Master techniques for finding antiderivatives.
+    real_world_applications:
+      - Physics problems
+      - Engineering
+      - Probability
+      - Statistics
+    lessons:
+      - number: 1
+        title: Basic Integration Rules
+        concepts:
+          - power rule
+          - trig integrals
+          - exponential and log integrals
+      - number: 2
+        title: Integration by Substitution
+        concepts:
+          - u-substitution
+          - changing bounds
+          - applications
+      - number: 3
+        title: Integration Using Long Division and Completing the Square
+        concepts:
+          - polynomial division
+          - completing the square
+          - partial fractions intro
+      - number: 4
+        title: Numerical Integration
+        concepts:
+          - trapezoidal rule
+          - error bounds
+          - applications
+
+  - number: 8
+    title: Applications of Integration
+    description: Apply integration to solve problems.
+    real_world_applications:
+      - Area between curves
+      - Volumes
+      - Physics
+      - Economics
+    lessons:
+      - number: 1
+        title: Area Between Curves
+        concepts:
+          - setting up integrals
+          - horizontal vs vertical
+          - multiple regions
+      - number: 2
+        title: Volumes by Cross-Sections
+        concepts:
+          - disk method
+          - washer method
+          - known cross-sections
+      - number: 3
+        title: Volumes by Shells
+        concepts:
+          - shell method
+          - choosing methods
+          - applications
+      - number: 4
+        title: Average Value of a Function
+        concepts:
+          - average value formula
+          - mean value theorem for integrals
+          - applications
+      - number: 5
+        title: Accumulation Functions and Particle Motion
+        concepts:
+          - position, velocity, acceleration
+          - displacement vs distance
+          - accumulation interpretations
