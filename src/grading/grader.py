@@ -75,6 +75,9 @@ Instructions:
 2. Compare to the correct answers
 3. For math problems, accept equivalent forms (e.g., 1/2 = 0.5)
 4. Note any work shown and whether the approach is correct
+5. IMPORTANT: If a question has NO answer (blank, empty, unanswered), mark it as is_correct: false with student_answer: "(no answer)"
+6. IMPORTANT: If student wrote "?", "help", "please help", "I don't know", "IDK", or similar - these are NOT answers. Mark as is_correct: false with student_answer: "(asked for help)"
+7. Rate your confidence in reading each answer: "high" (clear handwriting), "medium" (somewhat unclear), "low" (very hard to read, guessing)
 
 Respond in JSON format:
 {{
@@ -85,9 +88,10 @@ Respond in JSON format:
             "correct_answer": "the expected answer",
             "is_correct": true/false,
             "partial_credit": 0-1 (1 = full, 0.5 = half, etc.),
+            "reading_confidence": "high/medium/low",
             "work_shown": true/false,
             "work_correct": true/false/null,
-            "notes": "any observations about errors or approach"
+            "notes": "observations referencing the EXACT original question - do not make up different numbers"
         }}
     ],
     "error_patterns": [
@@ -142,6 +146,37 @@ Be precise in reading handwriting. If something is unclear, note it but make you
 
             # Calculate score
             results = grading_result.get("results", [])
+
+            # Post-process: ensure blank/empty/help-seeking answers are marked incorrect
+            non_answers = [
+                "(no answer)", "no answer", "", "blank", "n/a", "none", "-",
+                "?", "??", "???", "help", "please help", "i don't know",
+                "idk", "i dont know", "don't know", "dont know", "unsure",
+                "(asked for help)", "help me", "i need help"
+            ]
+            needs_review = []
+
+            for r in results:
+                student_answer = str(r.get("student_answer", "")).strip().lower()
+                if not student_answer or student_answer in non_answers:
+                    r["is_correct"] = False
+                    r["partial_credit"] = 0
+                    if not r.get("student_answer") or r.get("student_answer", "").strip() == "":
+                        r["student_answer"] = "(no answer)"
+                    elif student_answer in ["?", "??", "???", "help", "please help", "help me", "i need help"]:
+                        r["student_answer"] = "(asked for help)"
+
+                # Flag low/medium confidence readings for review
+                confidence = r.get("reading_confidence", "high").lower()
+                if confidence in ["low", "medium"]:
+                    r["needs_review"] = True
+                    needs_review.append({
+                        "question": r.get("number"),
+                        "answer_read": r.get("student_answer"),
+                        "confidence": confidence,
+                        "marked_correct": r.get("is_correct")
+                    })
+
             total_points = len(answer_key)
             earned_points = sum(
                 r.get("partial_credit", 1.0 if r.get("is_correct") else 0)
@@ -155,7 +190,8 @@ Be precise in reading handwriting. If something is unclear, note it but make you
             submission.results_json = results
             submission.feedback_json = {
                 "overall_notes": grading_result.get("overall_notes", ""),
-                "encouragement": grading_result.get("encouragement", "")
+                "encouragement": grading_result.get("encouragement", ""),
+                "needs_review": needs_review  # Questions with low/medium confidence readings
             }
             submission.error_patterns = grading_result.get("error_patterns", [])
 
@@ -184,7 +220,8 @@ Be precise in reading handwriting. If something is unclear, note it but make you
                     "error_patterns": grading_result.get("error_patterns", []),
                     "feedback": grading_result.get("overall_notes", ""),
                     "encouragement": grading_result.get("encouragement", ""),
-                    "diagnostic_feedback": diagnostic_feedback
+                    "diagnostic_feedback": diagnostic_feedback,
+                    "needs_review": needs_review  # Questions with uncertain handwriting readings
                 }
 
             # Update progress for non-diagnostic materials
@@ -201,7 +238,8 @@ Be precise in reading handwriting. If something is unclear, note it but make you
                 "results": results,
                 "error_patterns": grading_result.get("error_patterns", []),
                 "feedback": grading_result.get("overall_notes", ""),
-                "encouragement": grading_result.get("encouragement", "")
+                "encouragement": grading_result.get("encouragement", ""),
+                "needs_review": needs_review  # Questions with uncertain handwriting readings
             }
 
     def _calculate_module_scores(self, results: list, content: dict) -> dict:

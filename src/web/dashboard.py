@@ -1,4 +1,4 @@
-"""Streamlit web dashboard for the Pre-Algebra Learning System."""
+"""Streamlit web dashboard for Learnfast."""
 
 import streamlit as st
 from pathlib import Path
@@ -70,7 +70,7 @@ def get_student_color(student_name: str) -> str:
 def main():
     """Main dashboard application."""
     st.set_page_config(
-        page_title="Pre-Algebra Learning System",
+        page_title="Learnfast",
         page_icon="📐",
         layout="wide"
     )
@@ -290,7 +290,7 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.radio(
         "Go to",
-        ["Home", "Generate Materials", "Progress", "Pending Grading", "Work History", "Settings"]
+        ["Home", "Generate Materials", "Progress", "Pending Grading", "Work History", "Disputes", "Settings"]
     )
 
     if page == "Home":
@@ -303,6 +303,8 @@ def main():
         show_pending()
     elif page == "Work History":
         show_feedback_history()
+    elif page == "Disputes":
+        show_disputes()
     elif page == "Settings":
         show_settings()
 
@@ -1003,12 +1005,24 @@ def show_pending():
                                             )
                                         st.info("The feedback PDF includes question-by-question results and mini-lessons for areas to review.")
 
+                                    # Show warning if there are low-confidence readings
+                                    needs_review = result.get("needs_review", [])
+                                    if needs_review:
+                                        review_nums = [item.get("question") for item in needs_review]
+                                        st.warning(f"⚠️ {len(needs_review)} question(s) had unclear handwriting: Q{', Q'.join(str(n) for n in review_nums)}. Please check Work History to verify.")
+
                                     st.info("Check the Home page to see your updated starting position!")
                                 else:
                                     if result.get("is_mastery"):
                                         st.success(f"Score: {result['score']:.1f}% - MASTERY!")
                                     else:
                                         st.warning(f"Score: {result['score']:.1f}% - Needs more practice")
+
+                                    # Show warning if there are low-confidence readings
+                                    needs_review = result.get("needs_review", [])
+                                    if needs_review:
+                                        review_nums = [item.get("question") for item in needs_review]
+                                        st.warning(f"⚠️ {len(needs_review)} question(s) had unclear handwriting: Q{', Q'.join(str(n) for n in review_nums)}. Please check Work History to verify.")
 
                                     # Generate feedback PDF
                                     feedback_path = generate_feedback(sub['id'])
@@ -1238,21 +1252,207 @@ def show_feedback_history():
 
                 # Show question-by-question results if graded
                 if results and sub.score is not None:
-                    with st.expander("Question Details", expanded=False):
+                    # Check for needs_review items from confidence levels
+                    feedback = sub.feedback_json or {}
+                    needs_review_list = feedback.get("needs_review", [])
+                    needs_review_nums = {item.get("question") for item in needs_review_list}
+
+                    # Show warning banner if any questions need review
+                    if needs_review_nums:
+                        st.warning(f"⚠️ {len(needs_review_nums)} question(s) had unclear handwriting and may need review: Q{', Q'.join(str(n) for n in sorted(needs_review_nums))}")
+
+                    with st.expander("Question Details & Disputes", expanded=False):
                         for r in results:
                             is_correct = r.get("is_correct", False)
-                            icon = "✅" if is_correct else "❌"
-                            st.write(f"{icon} **Q{r.get('number')}**: {r.get('student_answer', 'N/A')}")
-                            if not is_correct:
-                                st.write(f"   Correct: {r.get('correct_answer', 'N/A')}")
-                            if r.get('notes'):
-                                st.caption(f"   Note: {r.get('notes')}")
+                            needs_review = r.get("needs_review", False) or r.get("number") in needs_review_nums
+                            confidence = r.get("reading_confidence", "high").lower()
+
+                            # Icon based on correctness and review status
+                            if needs_review:
+                                icon = "⚠️" if is_correct else "❓"
+                            else:
+                                icon = "✅" if is_correct else "❌"
+                            q_num = r.get('number')
+
+                            col1, col2 = st.columns([4, 1])
+                            with col1:
+                                answer_display = f"{icon} **Q{q_num}**: {r.get('student_answer', 'N/A')}"
+                                if needs_review:
+                                    answer_display += f" *(confidence: {confidence})*"
+                                st.write(answer_display)
+                                if not is_correct:
+                                    st.write(f"   Correct: {r.get('correct_answer', 'N/A')}")
+                                if r.get('notes'):
+                                    st.caption(f"   Note: {r.get('notes')}")
+                            with col2:
+                                # Dispute button
+                                dispute_key = f"dispute_{sub.id}_{q_num}"
+                                if st.button("Dispute", key=dispute_key, type="secondary"):
+                                    st.session_state[f"show_dispute_form_{sub.id}_{q_num}"] = True
+
+                            # Show dispute form if button was clicked
+                            if st.session_state.get(f"show_dispute_form_{sub.id}_{q_num}"):
+                                with st.form(key=f"dispute_form_{sub.id}_{q_num}"):
+                                    st.write(f"**Dispute Q{q_num}**")
+                                    reason = st.text_area(
+                                        "Why do you think this is graded incorrectly?",
+                                        key=f"reason_{sub.id}_{q_num}",
+                                        placeholder="Explain why you believe your answer should be marked differently..."
+                                    )
+                                    col_submit, col_cancel = st.columns(2)
+                                    with col_submit:
+                                        if st.form_submit_button("Submit Dispute", type="primary"):
+                                            if reason.strip():
+                                                # Save dispute to database
+                                                from src.database import Dispute, DisputeStatus
+                                                with get_session() as dispute_session:
+                                                    dispute = Dispute(
+                                                        submission_id=sub.id,
+                                                        question_number=q_num,
+                                                        student_reason=reason.strip(),
+                                                        original_correct=is_correct
+                                                    )
+                                                    dispute_session.add(dispute)
+                                                    dispute_session.commit()
+                                                st.success("Dispute submitted!")
+                                                st.session_state[f"show_dispute_form_{sub.id}_{q_num}"] = False
+                                                st.rerun()
+                                            else:
+                                                st.error("Please enter a reason for your dispute.")
+                                    with col_cancel:
+                                        if st.form_submit_button("Cancel"):
+                                            st.session_state[f"show_dispute_form_{sub.id}_{q_num}"] = False
+                                            st.rerun()
 
                 # Show error patterns
                 if sub.error_patterns:
                     st.write("**Areas to improve:**")
                     for pattern in sub.error_patterns:
                         st.write(f"- {pattern.get('pattern', 'Unknown')}: {pattern.get('description', '')}")
+
+
+def show_disputes():
+    """Show disputes page for reviewing and resolving grade disputes."""
+    from src.database import Dispute, DisputeStatus
+    from sqlalchemy.orm.attributes import flag_modified
+
+    current_student = get_current_student()
+    student_id = current_student["id"]
+    student_name = current_student["name"]
+
+    st.title(f"Grade Disputes - {student_name}")
+
+    with get_session() as session:
+        # Get all disputes for this student's submissions
+        disputes = (
+            session.query(Dispute)
+            .join(Submission)
+            .filter(Submission.student_id == student_id)
+            .order_by(Dispute.created_at.desc())
+            .all()
+        )
+
+        if not disputes:
+            st.info("No disputes submitted yet.")
+            st.write("You can dispute any graded question from the **Work History** page.")
+            return
+
+        # Separate pending and resolved
+        pending = [d for d in disputes if d.status == DisputeStatus.PENDING]
+        resolved = [d for d in disputes if d.status != DisputeStatus.PENDING]
+
+        # Show pending disputes
+        if pending:
+            st.subheader(f"Pending Disputes ({len(pending)})")
+
+            for dispute in pending:
+                sub = dispute.submission
+                material = sub.material
+                content = material.content_json or {}
+                subject_name = content.get("subject_name", "Unknown")
+
+                with st.expander(f"Q{dispute.question_number} - {subject_name} (Submitted {dispute.created_at.strftime('%Y-%m-%d %H:%M')})", expanded=True):
+                    # Get the question details
+                    results = sub.results_json or []
+                    q_result = next((r for r in results if r.get("number") == dispute.question_number), None)
+
+                    if q_result:
+                        st.write(f"**Student Answer:** {q_result.get('student_answer', 'N/A')}")
+                        st.write(f"**Correct Answer:** {q_result.get('correct_answer', 'N/A')}")
+                        st.write(f"**Currently Marked:** {'✅ Correct' if q_result.get('is_correct') else '❌ Wrong'}")
+
+                    st.write(f"**Student's Reason for Dispute:**")
+                    st.info(dispute.student_reason)
+
+                    # Resolution form (for parent/teacher)
+                    st.write("---")
+                    st.write("**Resolve this dispute:**")
+
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        if st.button("✅ Approve (Mark Correct)", key=f"approve_{dispute.id}", type="primary"):
+                            resolve_dispute(session, dispute, sub, approved=True)
+                            st.rerun()
+                    with col2:
+                        if st.button("❌ Reject (Keep as Wrong)", key=f"reject_{dispute.id}"):
+                            resolve_dispute(session, dispute, sub, approved=False)
+                            st.rerun()
+                    with col3:
+                        notes = st.text_input("Notes (optional)", key=f"notes_{dispute.id}")
+                        if notes:
+                            dispute.resolution_notes = notes
+
+        # Show resolved disputes
+        if resolved:
+            st.subheader(f"Resolved Disputes ({len(resolved)})")
+
+            for dispute in resolved:
+                sub = dispute.submission
+                material = sub.material
+                content = material.content_json or {}
+                subject_name = content.get("subject_name", "Unknown")
+
+                status_icon = "✅" if dispute.status == DisputeStatus.APPROVED else "❌"
+                status_text = "Approved" if dispute.status == DisputeStatus.APPROVED else "Rejected"
+
+                with st.expander(f"{status_icon} Q{dispute.question_number} - {subject_name} ({status_text})", expanded=False):
+                    st.write(f"**Original Reason:** {dispute.student_reason}")
+                    if dispute.resolution_notes:
+                        st.write(f"**Resolution Notes:** {dispute.resolution_notes}")
+                    if dispute.resolved_at:
+                        st.caption(f"Resolved: {dispute.resolved_at.strftime('%Y-%m-%d %H:%M')}")
+
+
+def resolve_dispute(session, dispute, submission, approved: bool):
+    """Resolve a dispute and update the submission score if needed."""
+    from src.database import DisputeStatus
+    from sqlalchemy.orm.attributes import flag_modified
+    from datetime import datetime
+
+    dispute.status = DisputeStatus.APPROVED if approved else DisputeStatus.REJECTED
+    dispute.resolved_at = datetime.utcnow()
+    dispute.new_correct = approved
+
+    # If approved, update the submission results
+    if approved:
+        results = list(submission.results_json or [])
+        for r in results:
+            if r.get("number") == dispute.question_number:
+                r["is_correct"] = True
+                r["partial_credit"] = 1.0
+                r["notes"] = f"Corrected via dispute: {dispute.student_reason[:50]}..."
+                break
+
+        # Recalculate score
+        total = len(results)
+        correct = sum(1 for r in results if r.get("is_correct"))
+        new_score = (correct / total * 100) if total > 0 else 0
+
+        submission.results_json = results
+        submission.score = new_score
+        flag_modified(submission, "results_json")
+
+    session.commit()
 
 
 def show_settings():

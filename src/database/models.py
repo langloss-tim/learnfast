@@ -1,4 +1,4 @@
-"""SQLAlchemy database models for the Pre-Algebra Learning System."""
+"""SQLAlchemy database models for Learnfast."""
 
 from datetime import datetime
 from typing import Optional
@@ -273,3 +273,38 @@ class Progress(Base):
         patterns = self.error_patterns_json or {}
         patterns[pattern] = patterns.get(pattern, 0) + count
         self.error_patterns_json = patterns
+
+
+class DisputeStatus(enum.Enum):
+    """Status of a grade dispute."""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+class Dispute(Base):
+    """Student disputes of graded questions."""
+    __tablename__ = "disputes"
+
+    id = Column(Integer, primary_key=True)
+    submission_id = Column(Integer, ForeignKey("submissions.id"), nullable=False)
+    question_number = Column(Integer, nullable=False)
+
+    # Student's dispute
+    student_reason = Column(Text, nullable=False)  # Why they think it's wrong
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Resolution
+    status = Column(SQLEnum(DisputeStatus), default=DisputeStatus.PENDING)
+    resolved_at = Column(DateTime, nullable=True)
+    resolution_notes = Column(Text, nullable=True)  # Parent/teacher notes
+
+    # What was the original grade and what should it be
+    original_correct = Column(Boolean)  # Was it marked correct originally?
+    new_correct = Column(Boolean, nullable=True)  # What it should be after review
+
+    # Relationships
+    submission = relationship("Submission")
+
+    def __repr__(self):
+        return f"<Dispute(id={self.id}, submission={self.submission_id}, q={self.question_number}, status={self.status.value})>"

@@ -1,4 +1,4 @@
-"""Configuration management for the Pre-Algebra Learning System."""
+"""Configuration management for Learnfast."""
 
 import os
 from pathlib import Path

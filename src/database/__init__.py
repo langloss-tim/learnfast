@@ -10,8 +10,10 @@ from .models import (
     Material,
     Submission,
     Progress,
+    Dispute,
     MaterialType,
     SubmissionStatus,
+    DisputeStatus,
 )
 
 __all__ = [
@@ -25,6 +27,8 @@ __all__ = [
     "Material",
     "Submission",
     "Progress",
+    "Dispute",
     "MaterialType",
     "SubmissionStatus",
+    "DisputeStatus",
 ]

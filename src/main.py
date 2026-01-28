@@ -1,10 +1,10 @@
-"""Main CLI entry point for the Adaptive Math Learning System."""
+"""Main CLI entry point for Learnfast."""
 
 import click
 from pathlib import Path
 
 from src.database import init_db, get_session, Student, Subject, StudentSubjectProgress
-from src.config import (
+from .config import (
     SCANS_FOLDER,
     GENERATED_FOLDER,
     ANTHROPIC_API_KEY,
@@ -15,14 +15,14 @@ from src.config import (
 
 @click.group()
 def cli():
-    """Pre-Algebra Mastery Learning System CLI."""
+    """Learnfast CLI."""
     pass
 
 
 @cli.command()
 def init():
     """Initialize the database and create default student."""
-    click.echo("Initializing Pre-Algebra Learning System...")
+    click.echo("Initializing Learnfast...")
 
     # Validate config
     issues = validate_config()
