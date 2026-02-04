@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "prealgebra-learning"
+version = "1.0.0"
+description = "Adaptive math learning system with AI-powered grading of handwritten work"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.40.0",
+    "streamlit>=1.30.0",
+    "sqlalchemy>=2.0.0",
+    "reportlab>=4.0.0",
+    "watchdog>=4.0.0",
+    "pyzbar>=0.1.9",
+    "qrcode>=7.4.0",
+    "pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.1.0",
+    "pyyaml>=6.0.0",
+    "PyMuPDF>=1.23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+prealgebra = "src.main:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

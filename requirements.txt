@@ -1,4 +1,4 @@
-# Learnfast Dependencies
+# Pre-Algebra Learning System Dependencies
 
 # Claude API for content generation and vision grading
 anthropic>=0.40.0
@@ -27,8 +27,3 @@ python-dotenv>=1.0.0
 
 # CLI
 click>=8.1.0
-
-
-pyyaml
-
-pymupdf
