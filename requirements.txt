@@ -27,3 +27,4 @@ python-dotenv>=1.0.0
 
 # CLI
 click>=8.1.0
+pyyaml>=6.0.0
