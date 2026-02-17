@@ -1,6 +1,6 @@
 """Database models and connection management."""
 
-from .db import init_db, get_session
+from .db import init_db, get_session, run_migrations
 from .models import (
     Student,
     Subject,
@@ -19,6 +19,7 @@ from .models import (
 __all__ = [
     "init_db",
     "get_session",
+    "run_migrations",
     "Student",
     "Subject",
     "StudentSubjectProgress",

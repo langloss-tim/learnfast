@@ -8,8 +8,7 @@ import sys
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.database import init_db, get_session, Student, Subject, StudentSubjectProgress, Material, Submission, Progress, Module, Lesson
-from src.database.db import run_migrations
+from src.database import init_db, get_session, run_migrations, Student, Subject, StudentSubjectProgress, Material, Submission, Progress, Module, Lesson
 from src.database.models import MaterialType, SubmissionStatus
 from src.content.generator import ContentGenerator
 from src.content.curriculum import get_all_modules, get_module, get_lesson
