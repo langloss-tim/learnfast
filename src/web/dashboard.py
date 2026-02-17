@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.database import init_db, get_session, Student, Subject, StudentSubjectProgress, Material, Submission, Progress, Module, Lesson
+from src.database.db import run_migrations
 from src.database.models import MaterialType, SubmissionStatus
 from src.content.generator import ContentGenerator
 from src.content.curriculum import get_all_modules, get_module, get_lesson
@@ -35,6 +36,12 @@ def init_session_state():
                 student = Student(name=STUDENT_NAME)
                 session.add(student)
                 session.commit()
+
+    # Always run migrations to ensure schema is up to date
+    # This handles the case where app was initialized before new columns were added
+    if "migrations_run" not in st.session_state:
+        run_migrations()
+        st.session_state.migrations_run = True
 
     # Initialize selected student
     if "selected_student_id" not in st.session_state:

@@ -39,8 +39,17 @@ def init_db():
 
 def run_migrations():
     """Run database migrations for schema changes."""
+    # Only run if database file exists
+    if not DATABASE_PATH.exists():
+        return
+
     try:
         with engine.connect() as conn:
+            # Check if progress table exists
+            result = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='progress'"))
+            if not result.fetchone():
+                return  # Table doesn't exist yet
+
             # Check if lesson_read column exists in progress table
             result = conn.execute(text("PRAGMA table_info(progress)"))
             columns = [row[1] for row in result.fetchall()]
@@ -55,7 +64,7 @@ def run_migrations():
                 conn.execute(text("ALTER TABLE progress ADD COLUMN lesson_read_at DATETIME"))
                 conn.commit()
     except Exception:
-        # Silently ignore migration errors (table might not exist yet)
+        # Silently ignore migration errors
         pass
 
 
