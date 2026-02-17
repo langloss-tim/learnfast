@@ -68,10 +68,6 @@ def run_migrations():
         pass
 
 
-# Run migrations on module import to ensure schema is up to date
-run_migrations()
-
-
 @contextmanager
 def get_session() -> Session:
     """Get a database session with automatic cleanup."""
