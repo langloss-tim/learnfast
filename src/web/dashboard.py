@@ -238,19 +238,23 @@ def main():
                 st.session_state.selected_subject_name = selected_subject
 
                 # Update last_accessed_at for this subject
-                with get_session() as session:
-                    from datetime import datetime
-                    progress = (
-                        session.query(StudentSubjectProgress)
-                        .filter(
-                            StudentSubjectProgress.student_id == current_student["id"],
-                            StudentSubjectProgress.subject_id == new_subject_id
+                try:
+                    with get_session() as session:
+                        from datetime import datetime, timezone
+                        progress = (
+                            session.query(StudentSubjectProgress)
+                            .filter(
+                                StudentSubjectProgress.student_id == current_student["id"],
+                                StudentSubjectProgress.subject_id == new_subject_id
+                            )
+                            .first()
                         )
-                        .first()
-                    )
-                    if progress:
-                        progress.last_accessed_at = datetime.utcnow()
-                        session.commit()
+                        if progress:
+                            progress.last_accessed_at = datetime.now(timezone.utc)
+                            session.commit()
+                except Exception:
+                    # Non-critical update, don't crash if it fails
+                    pass
 
         # Show velocity indicator for selected subject
         if st.session_state.get("selected_subject_id"):

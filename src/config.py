@@ -9,8 +9,24 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
+def get_secret(key: str, default: str = "") -> str:
+    """Get a secret from Streamlit secrets or environment variables.
+
+    Streamlit Cloud uses st.secrets for secret management, while local
+    development uses environment variables. This function tries both.
+    """
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass
+    return os.getenv(key, default)
+
+
 # --- Logging Setup ---
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = get_secret("LOG_LEVEL", "INFO").upper()
 
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
@@ -37,11 +53,11 @@ CLAUDE_PROJECTS_DIR = os.getenv("CLAUDE_PROJECTS_DIR", "")
 SCANS_FOLDER.mkdir(parents=True, exist_ok=True)
 GENERATED_FOLDER.mkdir(parents=True, exist_ok=True)
 
-# API Keys
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+# API Keys - use get_secret for Streamlit Cloud compatibility
+ANTHROPIC_API_KEY = get_secret("ANTHROPIC_API_KEY", "")
 
 # Student configuration
-STUDENT_NAME = os.getenv("STUDENT_NAME", "Student")
+STUDENT_NAME = get_secret("STUDENT_NAME", "Student")
 
 # Multi-student support - each student gets a distinct color for visual differentiation
 STUDENT_COLORS = {
