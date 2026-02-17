@@ -1,9 +1,11 @@
 """Claude-powered content generation for lessons and problems."""
 
 import json
+import logging
+import time
 import uuid
 from typing import Optional
-from anthropic import Anthropic
+from anthropic import Anthropic, APIError, APITimeoutError, RateLimitError
 
 from ..config import (
     ANTHROPIC_API_KEY,
@@ -12,7 +14,11 @@ from ..config import (
     QUESTIONS_PER_QUIZ,
     QUESTIONS_PER_TEST,
     MASTERY_ASSESSMENT_QUESTIONS,
+    API_MAX_RETRIES,
+    API_RETRY_DELAY,
 )
+
+logger = logging.getLogger("prealgebra.content")
 from ..database import get_session, Material, MaterialType, Lesson, Module, Student, Subject
 
 
@@ -21,6 +27,30 @@ class ContentGenerator:
 
     def __init__(self):
         self.client = Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    def _api_call_with_retry(self, **kwargs) -> object:
+        """Make an Anthropic API call with retry logic for transient errors."""
+        last_error = None
+        for attempt in range(1, API_MAX_RETRIES + 1):
+            try:
+                return self.client.messages.create(**kwargs)
+            except RateLimitError as e:
+                last_error = e
+                wait = API_RETRY_DELAY * attempt
+                logger.warning("Rate limited (attempt %d/%d), retrying in %ds", attempt, API_MAX_RETRIES, wait)
+                time.sleep(wait)
+            except APITimeoutError as e:
+                last_error = e
+                logger.warning("API timeout (attempt %d/%d)", attempt, API_MAX_RETRIES)
+                time.sleep(API_RETRY_DELAY)
+            except APIError as e:
+                if e.status_code and e.status_code >= 500:
+                    last_error = e
+                    logger.warning("API server error %s (attempt %d/%d)", e.status_code, attempt, API_MAX_RETRIES)
+                    time.sleep(API_RETRY_DELAY)
+                else:
+                    raise
+        raise last_error
 
     def _generate_qr_code(self) -> str:
         """Generate a unique QR code identifier."""
@@ -93,7 +123,7 @@ Make the content:
 - Build on concepts progressively
 - Include visual descriptions where helpful (e.g., "imagine a number line...")"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=4000,
                 messages=[{"role": "user", "content": prompt}]
@@ -215,7 +245,7 @@ Generate problems in JSON format:
 }}
 {difficulty_instruction}"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=4000,
                 messages=[{"role": "user", "content": prompt}]
@@ -303,7 +333,7 @@ Requirements:
 - Clear, specific answers
 - Include at least 2 real-world application problems"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=3000,
                 messages=[{"role": "user", "content": prompt}]
@@ -390,7 +420,7 @@ Requirements:
 - Include multi-step problems
 - Test deep understanding, not just procedures"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=4000,
                 messages=[{"role": "user", "content": prompt}]
@@ -468,7 +498,7 @@ Requirements:
 - Include extra hints and teaching notes
 - Make problems approachable but educational"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=3000,
                 messages=[{"role": "user", "content": prompt}]
@@ -504,6 +534,115 @@ Requirements:
                 "qr_code": qr_code,
                 "content": content_json,
                 "problem_count": len(content_json.get("problems", []))
+            }
+
+    def generate_tailored_lesson(self, module_number: int, weak_concepts: list[str], subject_id: int = None) -> Optional[dict]:
+        """Generate a tailored lesson focusing on specific weak concepts from diagnostic results."""
+        with get_session() as session:
+            query = session.query(Module).filter(Module.number == module_number)
+            if subject_id:
+                query = query.filter(Module.subject_id == subject_id)
+
+            module = query.first()
+            if not module:
+                return None
+
+            subject = module.subject if module.subject_id else None
+            subject_name = subject.name if subject else "Pre-Algebra"
+            grade_desc = f"grade {subject.grade_level}" if subject and subject.grade_level else "advanced fifth-grader"
+
+            # Get all concepts from the module's lessons for context
+            all_concepts = []
+            for lesson in module.lessons:
+                all_concepts.extend(lesson.concepts or [])
+
+            prompt = f"""Generate a focused remedial lesson for a {grade_desc} student who struggled with specific concepts on a diagnostic test.
+
+MODULE: {module.number}. {module.title}
+ALL MODULE CONCEPTS: {', '.join(all_concepts)}
+WEAK AREAS IDENTIFIED FROM DIAGNOSTIC: {', '.join(weak_concepts)}
+REAL-WORLD APPLICATIONS: {', '.join(module.real_world_applications or [])}
+
+The student showed gaps in understanding the weak areas listed above. Generate a targeted lesson that:
+1. Focuses PRIMARILY on the weak concepts
+2. Starts from the basics and builds understanding step-by-step
+3. Uses multiple explanations and approaches for each concept
+4. Includes extra examples with detailed walkthroughs
+
+Generate the lesson content in JSON format:
+{{
+    "title": "Review: {module.title} - Filling the Gaps",
+    "introduction": "Encouraging intro acknowledging this is review material to strengthen understanding",
+    "weak_areas_addressed": ["list", "of", "weak", "concepts"],
+    "sections": [
+        {{
+            "concept": "The specific weak concept being addressed",
+            "why_it_matters": "Why this concept is important",
+            "common_mistakes": ["Mistake 1 students make", "Mistake 2"],
+            "explanation": "Clear, detailed explanation starting from basics",
+            "visual_aid": "Description of a helpful visual (number line, diagram, etc.)",
+            "examples": [
+                {{
+                    "problem": "Example problem",
+                    "thinking_process": "How to approach this problem",
+                    "solution": "Detailed step-by-step solution",
+                    "check": "How to verify the answer is correct"
+                }}
+            ],
+            "tips": ["Helpful tip 1", "Helpful tip 2"],
+            "try_it": {{
+                "problem": "A simple problem for the student to try",
+                "hint": "A helpful hint",
+                "answer": "The answer"
+            }}
+        }}
+    ],
+    "summary": "Summary of key points covered",
+    "encouragement": "Encouraging message about progress"
+}}
+
+Make the content:
+- Extra patient and thorough - this student needs more support
+- Include 3-4 worked examples per weak concept
+- Address common mistakes explicitly
+- Use encouraging language throughout
+- Include visual descriptions and real-world connections"""
+
+            response = self._api_call_with_retry(
+                model=CLAUDE_MODEL,
+                max_tokens=6000,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            content_text = response.content[0].text
+
+            try:
+                start = content_text.find("{")
+                end = content_text.rfind("}") + 1
+                content_json = json.loads(content_text[start:end])
+            except json.JSONDecodeError:
+                return None
+
+            # Create material record - use first lesson of module as reference
+            first_lesson = module.lessons[0] if module.lessons else None
+            qr_code = self._generate_qr_code()
+            material = Material(
+                lesson_id=first_lesson.id if first_lesson else None,
+                material_type=MaterialType.LESSON,
+                content_json=content_json,
+                answer_key_json=None,
+                qr_code=qr_code
+            )
+            session.add(material)
+            session.commit()
+
+            return {
+                "material_id": material.id,
+                "qr_code": qr_code,
+                "content": content_json,
+                "module_number": module_number,
+                "module_title": module.title,
+                "weak_concepts": weak_concepts
             }
 
     def generate_diagnostic(self, questions_per_module: int = 4, subject_id: int = None) -> Optional[dict]:
@@ -594,7 +733,7 @@ Requirements:
 - Questions should be answerable without a calculator
 - Clear, unambiguous answers"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=8000,
                 messages=[{"role": "user", "content": prompt}]
@@ -710,7 +849,7 @@ Requirements:
 - Clear, unambiguous answers
 - Cover the most important concepts that prove understanding"""
 
-            response = self.client.messages.create(
+            response = self._api_call_with_retry(
                 model=CLAUDE_MODEL,
                 max_tokens=2000,
                 messages=[{"role": "user", "content": prompt}]
