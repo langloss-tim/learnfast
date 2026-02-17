@@ -1,6 +1,6 @@
 """Database connection and initialization."""
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from contextlib import contextmanager
 
@@ -21,6 +21,9 @@ def init_db():
     # Create all tables
     Base.metadata.create_all(engine)
 
+    # Run any necessary migrations
+    run_migrations()
+
     # Seed initial curriculum data if no subjects exist
     with get_session() as session:
         if session.query(Subject).count() == 0:
@@ -32,6 +35,24 @@ def init_db():
         elif session.query(Module).filter(Module.subject_id.is_(None)).count() > 0:
             # Migrate existing modules without subject_id
             migrate_modules_to_subjects(session)
+
+
+def run_migrations():
+    """Run database migrations for schema changes."""
+    with engine.connect() as conn:
+        # Check if lesson_read column exists in progress table
+        result = conn.execute(text("PRAGMA table_info(progress)"))
+        columns = [row[1] for row in result.fetchall()]
+
+        # Add lesson_read column if it doesn't exist
+        if 'lesson_read' not in columns:
+            conn.execute(text("ALTER TABLE progress ADD COLUMN lesson_read BOOLEAN DEFAULT 0"))
+            conn.commit()
+
+        # Add lesson_read_at column if it doesn't exist
+        if 'lesson_read_at' not in columns:
+            conn.execute(text("ALTER TABLE progress ADD COLUMN lesson_read_at DATETIME"))
+            conn.commit()
 
 
 @contextmanager
