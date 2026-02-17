@@ -1,5 +1,6 @@
 """Streamlit web dashboard for Learnfast."""
 
+import shutil
 import streamlit as st
 from pathlib import Path
 import sys
@@ -854,7 +855,7 @@ def show_pending():
                     # Rename temp file to permanent
                     final_filename = f"scan_{dt.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}{file_ext}"
                     final_path = SCANS_FOLDER / final_filename
-                    temp_path.rename(final_path)
+                    shutil.move(str(temp_path), str(final_path))
 
                     # Create submission
                     from src.database.models import SubmissionStatus
@@ -926,7 +927,7 @@ def show_pending():
                 # Rename temp file to permanent
                 final_filename = f"scan_{dt.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}{file_ext}"
                 final_path = SCANS_FOLDER / final_filename
-                temp_path.rename(final_path)
+                shutil.move(str(temp_path), str(final_path))
 
                 from src.database.models import SubmissionStatus
                 with get_session() as session:
@@ -945,8 +946,6 @@ def show_pending():
         # Clean up temp file if not submitted
         if temp_path.exists() and not st.session_state.get("submitted"):
             pass  # Keep temp file until user submits or uploads new file
-    elif uploaded_file is not None and selected_material_id is None:
-        st.warning("Please select which assignment this is before submitting.")
 
     st.divider()
 

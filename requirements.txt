@@ -22,6 +22,9 @@ qrcode>=7.4.0
 # Image processing
 pillow>=10.0.0
 
+# PDF viewing in dashboard
+pymupdf>=1.24.0
+
 # Environment variables
 python-dotenv>=1.0.0
 

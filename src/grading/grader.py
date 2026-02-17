@@ -418,7 +418,7 @@ Keep it friendly and encouraging - this is for a pre-algebra student. Format in 
 
                 try:
                     response = self.client.messages.create(
-                        model="claude-sonnet-4-20250514",
+                        model=CLAUDE_VISION_MODEL,
                         max_tokens=1500,
                         messages=[{"role": "user", "content": prompt}]
                     )
