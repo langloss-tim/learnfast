@@ -87,6 +87,11 @@ MAX_PROBLEMS = 35           # Maximum problems when slowing down
 BASE_PROBLEMS = 25          # Standard problem count (same as PROBLEMS_PER_PRACTICE)
 MASTERY_ASSESSMENT_QUESTIONS = 5  # Questions in mastery assessment for lesson skip
 
+# Teacher-Directed Learning Settings
+REQUIRE_LESSON_BEFORE_PRACTICE = True  # Must read lesson before practice
+REQUIRE_TEST_BEFORE_NEXT_MODULE = True  # Must pass module test to advance
+DIAGNOSTIC_REQUIRED = True  # All students must take diagnostic
+
 # Claude model settings
 CLAUDE_MODEL = "claude-sonnet-4-20250514"
 CLAUDE_VISION_MODEL = "claude-sonnet-4-20250514"

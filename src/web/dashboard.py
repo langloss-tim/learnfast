@@ -18,6 +18,8 @@ from src.grading.scanner import get_pending_submissions
 from src.grading.grader import Grader
 from src.grading.feedback import generate_feedback, generate_diagnostic_feedback
 from src.adaptive.pacing import AdaptivePacer
+from src.adaptive.learning_state import LearningState, LearningStateEngine
+from src.adaptive.assignment_controller import AssignmentController
 from src.config import STUDENT_NAME, SCANS_FOLDER, GENERATED_FOLDER, ANTHROPIC_API_KEY, STUDENT_COLORS
 
 
@@ -295,16 +297,14 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.radio(
         "Go to",
-        ["Home", "Generate Materials", "Progress", "Pending Grading", "Work History", "Disputes", "Settings"]
+        ["Today's Assignment", "Progress", "Upload Work", "Work History", "Disputes", "Settings"]
     )
 
-    if page == "Home":
-        show_home()
-    elif page == "Generate Materials":
-        show_generate()
+    if page == "Today's Assignment":
+        show_todays_assignment()
     elif page == "Progress":
         show_progress()
-    elif page == "Pending Grading":
+    elif page == "Upload Work":
         show_pending()
     elif page == "Work History":
         show_feedback_history()
@@ -314,417 +314,252 @@ def main():
         show_settings()
 
 
-def show_home():
-    """Show the home page with current status."""
+def show_todays_assignment():
+    """Show today's assignment - the single-focus teacher-directed view."""
     current_student = get_current_student()
     student_id = current_student["id"]
     student_name = current_student["name"]
     subject_id = st.session_state.get("selected_subject_id")
     subject_name = st.session_state.get("selected_subject_name", "Math")
 
-    st.title(f"{subject_name} Mastery Learning")
-    st.write(f"Welcome, **{student_name}**!")
-
-    pacer = AdaptivePacer()
-
-    # Check if diagnostic has been taken for this subject
-    has_diagnostic = pacer.has_taken_diagnostic(student_id, subject_id) if subject_id else False
-
-    # Show diagnostic section if not taken
-    if subject_id and not has_diagnostic:
-        st.info(f"**New to {subject_name}?** Take a diagnostic assessment to skip modules you already know!")
-
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("Take Diagnostic", type="primary"):
-                with st.spinner(f"Generating {subject_name} diagnostic assessment..."):
-                    generator = ContentGenerator()
-                    result = generator.generate_diagnostic(questions_per_module=4, subject_id=subject_id)
-                    if result:
-                        pdf_gen = PDFGenerator(student_name=student_name)
-                        pdf_path = pdf_gen.generate_diagnostic_pdf(result["material_id"])
-                        if pdf_path and Path(pdf_path).exists():
-                            st.session_state.diagnostic_generated = True
-                            st.session_state.diagnostic_pdf = pdf_path
-                            st.session_state.diagnostic_qr = result.get("qr_code")
-                            st.rerun()
-                        else:
-                            st.error("Failed to generate PDF")
-                    else:
-                        st.error("Failed to generate diagnostic. Check API key.")
-
-        # Show download button if just generated
-        if st.session_state.get("diagnostic_generated"):
-            pdf_path = st.session_state.get("diagnostic_pdf")
-            if pdf_path and Path(pdf_path).exists():
-                with open(pdf_path, "rb") as f:
-                    st.download_button(
-                        label=f"Download {subject_name} Diagnostic PDF",
-                        data=f.read(),
-                        file_name=Path(pdf_path).name,
-                        mime="application/pdf",
-                        type="primary"
-                    )
-                st.success(f"Diagnostic generated! QR Code: {st.session_state.get('diagnostic_qr')}")
-                st.write("Print this PDF, complete all questions, then upload through 'Pending Grading'.")
-
-        st.divider()
-
-    # Show diagnostic results if taken
-    if subject_id and has_diagnostic:
-        diagnostic_results = pacer.get_diagnostic_results(student_id, subject_id)
-        if diagnostic_results:
-            with st.expander("Diagnostic Results", expanded=False):
-                st.write(f"**Overall Score:** {diagnostic_results['overall_score']:.1f}%")
-
-                # Module breakdown
-                cols = st.columns(4)
-                for i, mod_num in enumerate(sorted(diagnostic_results['module_scores'].keys())):
-                    data = diagnostic_results['module_scores'][mod_num]
-                    title = diagnostic_results['module_titles'].get(mod_num, f"Module {mod_num}")
-
-                    with cols[i % 4]:
-                        if data['mastered']:
-                            st.success(f"**M{mod_num}**: {data['score']:.0f}%")
-                        else:
-                            st.warning(f"**M{mod_num}**: {data['score']:.0f}%")
-
-                mastered = len(diagnostic_results['modules_mastered'])
-                to_study = len(diagnostic_results['modules_to_study'])
-                st.write(f"**Modules Mastered:** {mastered} | **Modules to Study:** {to_study}")
-
-    status = pacer.get_student_status(student_id, subject_id)
-
-    # Status card
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric("Current Module", f"Module {status.get('current_module', 1)}")
-
-    with col2:
-        st.metric("Current Lesson", status.get("current_title", "Getting Started"))
-
-    with col3:
-        st.metric("Lessons Mastered", status.get("lessons_mastered", 0))
-
-    # Show velocity info if available
-    if status.get("velocity"):
-        velocity = status["velocity"]
-        velocity_indicator = pacer.get_velocity_indicator(student_id, subject_id)
-        st.markdown(f"**Current pace:** {velocity_indicator['icon']} {velocity_indicator['description']}")
-
-    # Check if skip lesson should be offered
-    if pacer.should_offer_lesson_skip(student_id, subject_id=subject_id):
-        st.success("🎉 You're on a roll! Want to skip ahead?")
-        if st.button("Take Mastery Assessment to Skip Lesson", type="primary"):
-            with st.spinner("Generating mastery assessment..."):
-                generator = ContentGenerator()
-                result = generator.generate_mastery_assessment(
-                    status.get("current_module", 1),
-                    status.get("current_lesson", 1),
-                    subject_id=subject_id
-                )
-                if result:
-                    pdf_gen = PDFGenerator(student_name=student_name)
-                    pdf_path = pdf_gen.generate_quiz_pdf(result["material_id"])
-                    if pdf_path and Path(pdf_path).exists():
-                        st.session_state.mastery_check_pdf = pdf_path
-                        st.session_state.mastery_check_qr = result.get("qr_code")
-                        st.rerun()
-                    else:
-                        st.error("Failed to generate PDF")
-                else:
-                    st.error("Failed to generate mastery assessment")
-
-        if st.session_state.get("mastery_check_pdf"):
-            pdf_path = st.session_state.mastery_check_pdf
-            if Path(pdf_path).exists():
-                with open(pdf_path, "rb") as f:
-                    st.download_button(
-                        label="Download Mastery Assessment PDF",
-                        data=f.read(),
-                        file_name=Path(pdf_path).name,
-                        mime="application/pdf"
-                    )
-                st.info("Get 100% on this short assessment to skip to the next lesson!")
-
-    # Next action
-    st.subheader("What's Next?")
-    st.info(status.get("message", "Let's get started!"))
-
-    # Recommendations
-    recommendations = pacer.recommend_next_steps(student_id)
-    if recommendations:
-        st.subheader("Recommended Actions")
-        for rec in recommendations:
-            action = rec.get("action", "")
-            desc = rec.get("description", "")
-
-            if action == "generate_lesson":
-                if st.button(f"Generate Lesson: {status.get('current_title')}"):
-                    with st.spinner("Generating lesson..."):
-                        generator = ContentGenerator()
-                        result = generator.generate_lesson(
-                            status.get("current_module", 1),
-                            status.get("current_lesson", 1),
-                            subject_id=subject_id
-                        )
-                        if result:
-                            pdf_gen = PDFGenerator(student_name=student_name)
-                            pdf_path = pdf_gen.generate_lesson_pdf(result["material_id"])
-                            st.success(f"Lesson generated for {student_name}! PDF saved to: {pdf_path}")
-                        else:
-                            st.error("Failed to generate lesson")
-
-            elif action == "generate_practice":
-                # Get adaptive problem count and difficulty
-                num_problems = pacer.calculate_problem_count(student_id, subject_id)
-                difficulty = pacer.get_difficulty_adjustment(student_id, subject_id)
-
-                # Show adaptive info
-                if difficulty == "easier":
-                    st.info(f"📝 Generating {num_problems} problems with extra support")
-                elif difficulty == "harder":
-                    st.info(f"📝 Generating {num_problems} challenging problems")
-                else:
-                    st.info(f"📝 Generating {num_problems} problems")
-
-                if st.button(f"Generate Practice: {status.get('current_title')}"):
-                    with st.spinner("Generating practice problems..."):
-                        generator = ContentGenerator()
-                        result = generator.generate_practice(
-                            status.get("current_module", 1),
-                            status.get("current_lesson", 1),
-                            num_problems=num_problems,
-                            difficulty=difficulty,
-                            subject_id=subject_id
-                        )
-                        if result:
-                            pdf_gen = PDFGenerator(student_name=student_name)
-                            pdf_path = pdf_gen.generate_practice_pdf(result["material_id"])
-                            st.success(f"Practice generated for {student_name}! PDF saved to: {pdf_path}")
-                        else:
-                            st.error("Failed to generate practice")
-
-            elif action == "grade":
-                st.write(desc)
-                st.info("👈 Select 'Pending Grading' from the sidebar to grade submissions.")
-
-            else:
-                st.write(f"- {desc}")
-
-    # Quick stats for current module
-    current_module_num = status.get("current_module", 1)
-    current_module_title = status.get("current_title", "")
-
-    # Get module-specific stats
-    with get_session() as session:
-        # Find the current module
-        if subject_id:
-            current_module = (
-                session.query(Module)
-                .filter(Module.subject_id == subject_id, Module.number == current_module_num)
-                .first()
-            )
-        else:
-            current_module = session.query(Module).filter(Module.number == current_module_num).first()
-
-        if current_module:
-            # Get lessons in this module
-            module_lessons = current_module.lessons
-            total_lessons = len(module_lessons)
-            lesson_ids = [l.id for l in module_lessons]
-
-            # Get mastered lessons count
-            mastered_count = (
-                session.query(Progress)
-                .filter(
-                    Progress.student_id == student_id,
-                    Progress.lesson_id.in_(lesson_ids),
-                    Progress.mastered == True
-                )
-                .count()
-            ) if lesson_ids else 0
-
-            # Get submissions for this module
-            submissions = (
-                session.query(Submission)
-                .join(Material)
-                .filter(
-                    Submission.student_id == student_id,
-                    Material.lesson_id.in_(lesson_ids)
-                )
-                .count()
-            ) if lesson_ids else 0
-
-            st.subheader(f"Module {current_module_num}: {current_module.title}")
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-                st.metric("Lessons Mastered", f"{mastered_count} / {total_lessons}")
-            with col2:
-                st.metric("Submissions", submissions)
-            with col3:
-                pct = (mastered_count / total_lessons * 100) if total_lessons > 0 else 0
-                st.metric("Module Progress", f"{pct:.0f}%")
-
-
-def show_generate():
-    """Show the material generation page."""
-    current_student = get_current_student()
-    student_id = current_student["id"]
-    student_name = current_student["name"]
-    subject_id = st.session_state.get("selected_subject_id")
-    subject_name = st.session_state.get("selected_subject_name", "Math")
-
-    st.title(f"Generate {subject_name} Materials - {student_name}")
-
-    # Get modules for the selected subject only
-    with get_session() as session:
-        if subject_id:
-            db_modules = (
-                session.query(Module)
-                .filter(Module.subject_id == subject_id)
-                .order_by(Module.number)
-                .all()
-            )
-        else:
-            db_modules = session.query(Module).order_by(Module.number).all()
-
-        modules = [
-            {
-                "id": m.id,
-                "number": m.number,
-                "title": m.title,
-                "lesson_count": len(m.lessons)
-            }
-            for m in db_modules
-        ]
-
-    if not modules:
-        st.warning(f"No modules found for {subject_name}. The curriculum may need to be set up.")
+    if not subject_id:
+        st.warning("Please select a subject from the sidebar to begin.")
         return
 
-    col1, col2 = st.columns(2)
+    # Initialize assignment controller
+    controller = AssignmentController()
+    assignment = controller.get_assignment(student_id, subject_id)
+    ui_config = controller.get_state_ui_config(assignment.state)
 
-    with col1:
-        module_options = {f"Module {m['number']}: {m['title']}": m for m in modules}
-        selected_module_key = st.selectbox("Select Module", list(module_options.keys()))
-        selected_module_data = module_options[selected_module_key]
-        module_id = selected_module_data["id"]
-        module_number = selected_module_data["number"]
+    # Get velocity indicator
+    pacer = AdaptivePacer()
+    velocity = pacer.get_velocity_indicator(student_id, subject_id)
 
-    # Get lessons for selected module
-    with get_session() as session:
-        db_module = session.query(Module).filter(Module.id == module_id).first()
-        lessons = [
-            {"id": l.id, "number": l.number, "title": l.title}
-            for l in db_module.lessons
-        ] if db_module else []
+    # Main assignment card
+    st.markdown(f"""
+        <div style="text-align: center; padding: 10px; background-color: #f0f2f6; border-radius: 10px; margin-bottom: 20px;">
+            <h2 style="margin: 0;">TODAY'S ASSIGNMENT - {student_name}</h2>
+            <p style="margin: 5px 0; color: #666;">{subject_name}</p>
+        </div>
+    """, unsafe_allow_html=True)
 
-    with col2:
-        if not lessons:
-            st.selectbox("Select Lesson", ["No lessons available"])
-            lesson_id = None
-            lesson_number = 1
-        else:
-            lesson_options = {f"Lesson {l['number']}: {l['title']}": l for l in lessons}
-            selected_lesson_key = st.selectbox("Select Lesson", list(lesson_options.keys()))
-            selected_lesson_data = lesson_options[selected_lesson_key]
-            lesson_id = selected_lesson_data["id"]
-            lesson_number = selected_lesson_data["number"]
+    # Phase indicator
+    phase = ui_config.get("phase", "LEARNING")
+    phase_color = _get_phase_color(phase)
 
-    # Material type selection
-    material_type = st.radio(
-        "Material Type",
-        ["Lesson", "Practice", "Quiz (Module)", "Test (Module)"],
-        horizontal=True
+    st.markdown(f"""
+        <div style="background-color: {phase_color}20; padding: 15px; border-radius: 8px; border-left: 4px solid {phase_color}; margin-bottom: 20px;">
+            <h4 style="margin: 0; color: {phase_color};">{phase} PHASE</h4>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Module and lesson info
+    if assignment.module_number and assignment.lesson_number:
+        st.markdown(f"**Module {assignment.module_number}:** {assignment.module_title}")
+        st.markdown(f"**Lesson {assignment.lesson_number}:** {assignment.lesson_title}")
+    elif assignment.module_number:
+        st.markdown(f"**Module {assignment.module_number}:** {assignment.module_title}")
+
+    st.divider()
+
+    # Assignment title and instructions
+    st.subheader(assignment.title)
+    st.write(assignment.instructions)
+
+    # Encouragement message
+    if assignment.encouragement:
+        st.info(assignment.encouragement)
+
+    st.divider()
+
+    # Action buttons based on state
+    _render_assignment_actions(
+        assignment=assignment,
+        controller=controller,
+        student_id=student_id,
+        subject_id=subject_id,
+        student_name=student_name,
+        ui_config=ui_config
     )
 
-    if st.button("Generate Material", type="primary"):
-        if not lessons:
-            st.error("No lessons available for this module.")
-            return
+    # Progress footer
+    st.divider()
+    _render_progress_footer(assignment, velocity, subject_id, student_id)
 
-        with st.spinner(f"Generating {subject_name} content with Claude..."):
-            generator = ContentGenerator()
-            pdf_gen = PDFGenerator(student_name=student_name)
-            result = None
 
-            if material_type == "Lesson":
-                result = generator.generate_lesson(module_number, lesson_number, subject_id=subject_id)
+def _get_phase_color(phase: str) -> str:
+    """Get color for a learning phase."""
+    colors = {
+        "ASSESSMENT": "#3B82F6",  # Blue
+        "LEARNING": "#10B981",    # Green
+        "PRACTICE": "#F59E0B",    # Yellow/Orange
+        "REVIEW": "#F97316",      # Orange
+        "TEST": "#8B5CF6",        # Purple
+        "GRADING": "#6B7280",     # Gray
+        "COMPLETE": "#10B981",    # Green
+        "MODULE COMPLETE": "#EAB308",  # Gold
+        "FINISHED!": "#EAB308",   # Gold
+    }
+    return colors.get(phase, "#6B7280")
+
+
+def _render_assignment_actions(
+    assignment,
+    controller: AssignmentController,
+    student_id: int,
+    subject_id: int,
+    student_name: str,
+    ui_config: dict
+):
+    """Render the appropriate action buttons for the current assignment."""
+    state = assignment.state
+
+    # Handle generation states
+    if assignment.action_type == "generate":
+        if st.button(assignment.action_label, type="primary", use_container_width=True):
+            with st.spinner(f"Generating your {_get_material_type_name(state)}..."):
+                result = controller.generate_material_for_assignment(
+                    assignment, student_id, subject_id, student_name
+                )
                 if result:
-                    pdf_path = pdf_gen.generate_lesson_pdf(result["material_id"])
+                    st.session_state.generated_material = result
+                    st.success("Generated successfully!")
+                    st.rerun()
+                else:
+                    st.error("Failed to generate material. Please check your API key.")
 
-            elif material_type == "Practice":
-                result = generator.generate_practice(module_number, lesson_number, subject_id=subject_id)
-                if result:
-                    pdf_path = pdf_gen.generate_practice_pdf(result["material_id"])
+        # Show download if just generated
+        if st.session_state.get("generated_material"):
+            result = st.session_state.generated_material
+            file_path = result.get("file_path")
+            if file_path and Path(file_path).exists():
+                with open(file_path, "rb") as f:
+                    st.download_button(
+                        label="Download PDF",
+                        data=f.read(),
+                        file_name=Path(file_path).name,
+                        mime="application/pdf",
+                        type="primary",
+                        use_container_width=True
+                    )
+                st.caption(f"QR Code: {result.get('qr_code', 'N/A')}")
+        return
 
-            elif material_type == "Quiz (Module)":
-                result = generator.generate_quiz(module_number, subject_id=subject_id)
-                if result:
-                    pdf_path = pdf_gen.generate_quiz_pdf(result["material_id"])
+    # Handle download states
+    if assignment.action_type == "download" and assignment.material_id:
+        download_info = controller.get_material_download_info(assignment.material_id)
+        if download_info and download_info.get("exists"):
+            with open(download_info["file_path"], "rb") as f:
+                st.download_button(
+                    label=assignment.action_label,
+                    data=f.read(),
+                    file_name=download_info["filename"],
+                    mime="application/pdf",
+                    type="primary",
+                    use_container_width=True
+                )
+            st.caption(f"QR Code: {download_info.get('qr_code', 'N/A')}")
 
-            elif material_type == "Test (Module)":
-                result = generator.generate_test(module_number, subject_id=subject_id)
-                if result:
-                    pdf_path = pdf_gen.generate_test_pdf(result["material_id"])
-
-            if result:
-                st.success(f"Generated successfully!")
-                st.write(f"**QR Code:** {result.get('qr_code', 'N/A')}")
-
-                # Add download button
-                if pdf_path and Path(pdf_path).exists():
-                    with open(pdf_path, "rb") as pdf_file:
-                        pdf_bytes = pdf_file.read()
-                        st.download_button(
-                            label="Download PDF to Print",
-                            data=pdf_bytes,
-                            file_name=Path(pdf_path).name,
-                            mime="application/pdf",
-                            type="primary"
-                        )
-                st.info("Click the button above to download, then print!")
-            else:
-                st.error("Failed to generate material. Check your API key.")
-
-    # Show generated materials
-    st.subheader("Previously Generated Materials")
-
-    with get_session() as session:
-        materials = (
-            session.query(Material)
-            .join(Lesson)
-            .join(Module)
-            .filter(Module.number == module_number)
-            .order_by(Material.created_at.desc())
-            .limit(10)
-            .all()
-        )
-
-        if materials:
-            for mat in materials:
-                col1, col2, col3 = st.columns([3, 2, 2])
-                with col1:
-                    st.write(f"**{mat.material_type.value.title()}** - {mat.lesson.title}")
-                with col2:
-                    st.write(f"QR: {mat.qr_code}")
-                with col3:
-                    if mat.file_path and Path(mat.file_path).exists():
-                        with open(mat.file_path, "rb") as f:
-                            st.download_button(
-                                label="Download",
-                                data=f.read(),
-                                file_name=Path(mat.file_path).name,
-                                mime="application/pdf",
-                                key=f"dl_{mat.id}"
-                            )
-                    else:
-                        st.write("Not found")
+            # For lesson materials, show "I've Read the Lesson" button
+            if state == LearningState.LEARNING_LESSON:
+                st.write("")  # Spacer
+                if st.button("I've Read the Lesson - Ready for Practice", type="secondary", use_container_width=True):
+                    controller.mark_lesson_complete(student_id, assignment.lesson_id)
+                    st.session_state.generated_material = None  # Clear any cached material
+                    st.success("Great! Let's generate your practice problems.")
+                    st.rerun()
         else:
-            st.write("No materials generated yet for this module.")
+            # Material doesn't exist, offer to regenerate
+            st.warning("Material file not found. Let's generate it again.")
+            if st.button("Regenerate " + _get_material_type_name(state), type="primary"):
+                with st.spinner("Regenerating..."):
+                    result = controller.generate_material_for_assignment(
+                        assignment, student_id, subject_id, student_name
+                    )
+                    if result:
+                        st.session_state.generated_material = result
+                        st.rerun()
+        return
+
+    # Handle upload states
+    if assignment.action_type == "upload":
+        st.info("Upload your completed work using the 'Upload Work' page in the sidebar.")
+        if st.button("Go to Upload Work", use_container_width=True):
+            st.session_state.page = "Upload Work"
+            st.rerun()
+        return
+
+    # Handle continue states (mastered lesson, module complete)
+    if assignment.action_type == "continue":
+        if state == LearningState.MASTERED_LESSON:
+            if st.button(assignment.action_label, type="primary", use_container_width=True):
+                controller.advance_student(student_id, subject_id)
+                st.session_state.generated_material = None
+                st.rerun()
+
+        elif state == LearningState.MODULE_COMPLETE:
+            st.balloons()
+            if st.button(assignment.action_label, type="primary", use_container_width=True):
+                controller.advance_student(student_id, subject_id)
+                st.session_state.generated_material = None
+                st.rerun()
+
+        elif state == LearningState.SUBJECT_COMPLETE:
+            st.balloons()
+            st.success("Congratulations on completing the entire subject!")
+        return
+
+    # Handle wait states
+    if assignment.action_type == "wait":
+        st.info("Please wait while we prepare your next assignment.")
+
+
+def _get_material_type_name(state: LearningState) -> str:
+    """Get a friendly name for the material type based on state."""
+    names = {
+        LearningState.NEEDS_DIAGNOSTIC: "diagnostic assessment",
+        LearningState.LEARNING_LESSON: "lesson",
+        LearningState.PRACTICE_READY: "practice problems",
+        LearningState.PRACTICING: "practice problems",
+        LearningState.NEEDS_REMEDIATION: "extra practice",
+        LearningState.REMEDIATING: "extra practice",
+        LearningState.TEST_READY: "module test",
+        LearningState.TESTING: "module test",
+    }
+    return names.get(state, "material")
+
+
+def _render_progress_footer(assignment, velocity: dict, subject_id: int, student_id: int):
+    """Render the progress footer with progress bar and pace indicator."""
+    col1, col2 = st.columns([3, 1])
+
+    with col1:
+        # Progress bar
+        progress_pct = assignment.progress_percent / 100
+        st.progress(progress_pct)
+
+        # Position info
+        if assignment.module_number:
+            pacer = AdaptivePacer()
+            summary = pacer.get_progress_summary(student_id, subject_id)
+            total_modules = len(summary.get("modules", []))
+
+            st.caption(
+                f"Module {assignment.module_number}/{total_modules} | "
+                f"Lesson {assignment.lesson_number or '?'} | "
+                f"{assignment.progress_percent:.0f}% complete"
+            )
+        else:
+            st.caption(f"{assignment.progress_percent:.0f}% complete")
+
+    with col2:
+        # Pace indicator
+        st.markdown(f"**Pace:** {velocity['icon']} {velocity['label'].title()}")
+
+
+def show_home():
+    """Legacy home page - redirects to today's assignment."""
+    show_todays_assignment()
 
 
 def show_progress():
