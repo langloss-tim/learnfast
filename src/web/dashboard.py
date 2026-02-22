@@ -1374,50 +1374,48 @@ def show_settings():
             if st.button("Reset Progress for This Subject", type="secondary"):
                 with get_session() as session:
                     # Find all lessons in this subject
-                    lesson_ids = [
-                        l.id for l in
+                    lessons = (
                         session.query(Lesson)
                         .join(Module)
                         .filter(Module.subject_id == reset_subject_id)
                         .all()
-                    ]
+                    )
 
-                    if lesson_ids:
-                        # Reset mastery on all progress records
-                        reset_count = (
+                    reset_count = 0
+                    for lesson in lessons:
+                        prog = (
                             session.query(Progress)
                             .filter(
                                 Progress.student_id == reset_student_id,
-                                Progress.lesson_id.in_(lesson_ids)
+                                Progress.lesson_id == lesson.id
                             )
-                            .update({
-                                Progress.mastered: False,
-                                Progress.mastered_at: None,
-                                Progress.best_practice_score: None,
-                                Progress.practice_attempts: 0,
-                                Progress.best_quiz_score: None,
-                                Progress.quiz_attempts: 0,
-                            }, synchronize_session="fetch")
+                            .first()
                         )
+                        if prog:
+                            prog.mastered = False
+                            prog.mastered_at = None
+                            prog.best_practice_score = None
+                            prog.practice_attempts = 0
+                            prog.best_quiz_score = None
+                            prog.quiz_attempts = 0
+                            reset_count += 1
 
-                        # Reset subject progress status
-                        (
-                            session.query(StudentSubjectProgress)
-                            .filter(
-                                StudentSubjectProgress.student_id == reset_student_id,
-                                StudentSubjectProgress.subject_id == reset_subject_id
-                            )
-                            .update({
-                                StudentSubjectProgress.status: "active",
-                                StudentSubjectProgress.completed_at: None,
-                            }, synchronize_session="fetch")
+                    # Reset subject progress status
+                    ssp = (
+                        session.query(StudentSubjectProgress)
+                        .filter(
+                            StudentSubjectProgress.student_id == reset_student_id,
+                            StudentSubjectProgress.subject_id == reset_subject_id
                         )
+                        .first()
+                    )
+                    if ssp:
+                        ssp.status = "active"
+                        ssp.completed_at = None
 
-                        session.commit()
-                        st.success(f"Reset {reset_count} lesson(s) for {reset_student} in {reset_subject}. They can now redo their work.")
-                        st.rerun()
-                    else:
-                        st.warning("No lessons found for this subject.")
+                    session.commit()
+                    st.success(f"Reset {reset_count} lesson(s) for {reset_student} in {reset_subject}. They can now redo their work.")
+                    st.rerun()
         else:
             st.info("This student is not enrolled in any subjects.")
 
